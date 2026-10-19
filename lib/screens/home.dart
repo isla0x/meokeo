@@ -4,6 +4,7 @@ import '../data.dart';
 import '../theme.dart';
 import 'room_screen.dart';
 import 'join_room.dart';
+import 'notif_settings.dart';
 import 'room_create.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -15,6 +16,12 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('뭐먹어?', style: TextStyle(fontWeight: FontWeight.w800)),
         actions: [
+          IconButton(
+            tooltip: '알림 시간',
+            icon: const Icon(Icons.notifications_none_rounded),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const NotifSettingsScreen())),
+          ),
           IconButton(
             tooltip: '새 방 만들기',
             icon: const Icon(Icons.add_rounded),

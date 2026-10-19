@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'data.dart';
 import 'firebase_options.dart';
+import 'notifications.dart';
 import 'screens/home.dart';
 import 'screens/nickname.dart';
 import 'theme.dart';
@@ -11,6 +12,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.ios);
   runApp(const MeokeoApp());
+  Notifier.instance.restore().catchError((_) {});
 }
 
 class MeokeoApp extends StatelessWidget {
