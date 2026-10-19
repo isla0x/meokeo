@@ -116,13 +116,15 @@ List<Post> _defaultPosts() => [
       post('2026-10-18', Meal.dinner, 'seoyeon', 'bibim'),
     ];
 
-Future<void> setup(WidgetTester tester, {double keyboard = 0}) async {
-  tester.view.physicalSize = const Size(780, 1688);
-  tester.view.devicePixelRatio = 2.0;
-  const pad = FakeViewPadding(top: 94, bottom: 68);
+/// [store]가 true면 앱스토어용 크기(아이폰 6.3인치, 1206×2622 @3x)로 그려요.
+Future<void> setup(WidgetTester tester, {double keyboard = 0, bool store = false}) async {
+  final dpr = store ? 3.0 : 2.0;
+  tester.view.physicalSize = store ? const Size(1206, 2622) : const Size(780, 1688);
+  tester.view.devicePixelRatio = dpr;
+  final pad = store ? const FakeViewPadding(top: 186, bottom: 102) : const FakeViewPadding(top: 94, bottom: 68);
   tester.view.padding = pad;
   tester.view.viewPadding = pad;
-  tester.view.viewInsets = FakeViewPadding(bottom: keyboard * 2);
+  tester.view.viewInsets = FakeViewPadding(bottom: keyboard * dpr);
   debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
   debugDisableShadows = false;
   addTearDown(() {
@@ -156,10 +158,10 @@ Future<void> openSheet(WidgetTester tester, Widget sheet) async {
   await settle(tester);
 }
 
-Future<void> shot(WidgetTester tester, String name) async {
+Future<void> shot(WidgetTester tester, String name, {double pixelRatio = 2}) async {
   await tester.runAsync(() async {
     final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(shotKey));
-    final img = await boundary.toImage(pixelRatio: 2);
+    final img = await boundary.toImage(pixelRatio: pixelRatio);
     final bytes = (await img.toByteData(format: ui.ImageByteFormat.png))!;
     final f = File('$outDir/$name.png')..createSync(recursive: true);
     f.writeAsBytesSync(bytes.buffer.asUint8List());
@@ -172,7 +174,7 @@ Future<void> finish(WidgetTester tester) async {
 }
 
 /// 화면 사진 테스트 하나. 끝나면 (실패해도) 테스트용 설정을 원래대로 돌려놔요.
-void shotTest(String name, Future<void> Function(WidgetTester tester) body) {
+void shotTest(String name, Future<void> Function(WidgetTester tester) body, {bool skip = false}) {
   testWidgets(name, (tester) async {
     try {
       await body(tester);
@@ -180,7 +182,7 @@ void shotTest(String name, Future<void> Function(WidgetTester tester) body) {
       debugDefaultTargetPlatformOverride = null;
       debugDisableShadows = true; // 테스트 기본값
     }
-  });
+  }, skip: skip);
 }
 
 void main() {

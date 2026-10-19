@@ -36,6 +36,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/out/shots"
           SHOT_DIR="$RUNNER_TEMP/out/shots" flutter test --reporter expanded 2>&1 | tee "$RUNNER_TEMP/out/test.txt" || true
 
+      - name: 앱스토어용 화면 사진 뽑기 (1206×2622)
+        run: |
+          mkdir -p "$RUNNER_TEMP/out/store"
+          STORE_SHOTS=1 SHOT_DIR="$RUNNER_TEMP/out/store" flutter test test/store_shots_test.dart --reporter expanded 2>&1 | tee "$RUNNER_TEMP/out/store_test.txt" || true
+
       - name: 결과를 ci-output 브랜치에 올리기
         if: always()
         run: |
