@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-// 목업 색: 청록 포인트 + iOS 그룹 배경
-const Color kTeal = Color(0xFF2F7F7A);
-const Color kTealSoft = Color(0xFFE3F0EE);
+// 하루링과 같은 파란 포인트 (이름은 kTeal이지만 값은 하루링 kAccent)
+const Color kTeal = Color(0xFF55A0FA);
+const Color kTealSoft = Color(0xFFE3EEFD);
+const Color kDeep = Color(0xFF1F63C4);
 const Color kBg = Color(0xFFF2F2F7);
 const Color kInk = Color(0xFF111111);
 const Color kMuted = Color(0xFF6C6C70);

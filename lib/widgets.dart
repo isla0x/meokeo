@@ -13,8 +13,8 @@ class RoomKind {
 const List<RoomKind> kRoomKinds = [
   RoomKind('heart', Color(0xFFFF6B94), Icons.favorite_rounded),
   RoomKind('home', Color(0xFFFF9F0A), Icons.home_rounded),
-  RoomKind('people', Color(0xFF5AA9F0), Icons.groups_rounded),
-  RoomKind('dining', kTeal, Icons.restaurant_rounded),
+  RoomKind('people', Color(0xFF7FC4F5), Icons.groups_rounded),
+  RoomKind('dining', kDeep, Icons.restaurant_rounded),
 ];
 
 RoomKind kindOf(String key) =>
