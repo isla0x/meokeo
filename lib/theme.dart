@@ -51,6 +51,21 @@ TextStyle ts(
   );
 }
 
+/// 큰 제목용 굵은 글꼴 (Black Han Sans)
+TextStyle th(double size, {Color color = C.accent, double? lh}) {
+  return TextStyle(
+    inherit: false,
+    fontFamily: 'BlackHanSans',
+    fontFamilyFallback: const ['Pretendard'],
+    fontSize: size,
+    fontWeight: FontWeight.w400,
+    color: color,
+    height: lh == null ? null : lh / size,
+    leadingDistribution: TextLeadingDistribution.even,
+    decoration: TextDecoration.none,
+  );
+}
+
 const List<BoxShadow> kCardShadow = [
   BoxShadow(color: Color(0x0D000000), blurRadius: 0, spreadRadius: 0.5),
   BoxShadow(color: Color(0x0D000000), offset: Offset(0, 1), blurRadius: 2),

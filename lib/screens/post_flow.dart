@@ -155,14 +155,14 @@ class _PostSheetState extends State<PostSheet> {
               padding: EdgeInsets.only(top: 4, bottom: 150 + kb),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 Container(
-                  height: 232,
+                  height: 340,
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(32),
                     boxShadow: const [BoxShadow(color: Color(0x14000000), spreadRadius: 0.5)],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(32),
                     child: Stack(fit: StackFit.expand, children: [
                       PhotoFill(_image),
                       Positioned(
@@ -198,8 +198,9 @@ class _PostSheetState extends State<PostSheet> {
                 FooterNote(widget.auto ? '지금 시간 기준으로 ${widget.meal.label}에 넣었어요' : '${widget.meal.label}에 올려요'),
                 const SizedBox(height: 12),
                 CardBox(
+                  radius: 28,
                   child: Container(
-                    height: 52,
+                    height: 56,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(children: [
                       Text('메뉴', style: ts(15, w: FontWeight.w600, lh: 20)),
@@ -224,41 +225,42 @@ class _PostSheetState extends State<PostSheet> {
                   ),
                 ),
                 const SectionLabel('어느 방에 올릴까요?', top: 16),
-                CardBox(
-                  clip: true,
-                  child: Column(children: [
-                    for (var i = 0; i < rooms.length; i++)
-                      SizedBox(
-                        height: 60,
-                        child: Stack(children: [
-                          Positioned.fill(
-                            child: Padding(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final r in rooms)
+                      Semantics(
+                        button: true,
+                        selected: picked.contains(r.id),
+                        label: '${r.name} 방에 올리기',
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() {
+                            if (picked.contains(r.id)) {
+                              picked.remove(r.id);
+                            } else {
+                              picked.add(r.id);
+                            }
+                          }),
+                          child: Container(
+                            height: 44,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(children: [
-                              RoomBadge(rooms[i].icon, size: 32, glyph: 18, radius: 8),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Text(rooms[i].name, maxLines: 1, overflow: TextOverflow.ellipsis, style: ts(15, lh: 20)),
-                                  Text('${rooms[i].members.length}명', style: ts(12, lh: 16, color: C.sub)),
-                                ]),
-                              ),
-                              const SizedBox(width: 12),
-                              MSwitch(
-                                label: '${rooms[i].name} 방에 올리기',
-                                value: picked.contains(rooms[i].id),
-                                onChanged: (v) => setState(() {
-                                  if (v) {
-                                    picked.add(rooms[i].id);
-                                  } else {
-                                    picked.remove(rooms[i].id);
-                                  }
-                                }),
-                              ),
+                            decoration: BoxDecoration(
+                              color: picked.contains(r.id) ? C.accent : C.white,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: picked.contains(r.id) ? null : kCardShadow,
+                            ),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                              if (picked.contains(r.id)) ...[
+                                const Icon(CupertinoIcons.checkmark_alt, size: 16, color: C.lime),
+                                const SizedBox(width: 6),
+                              ],
+                              Text(r.name, style: ts(14, w: FontWeight.w700, lh: 20, color: picked.contains(r.id) ? C.white : C.accent)),
+                              const SizedBox(width: 6),
+                              Text('${r.members.length}', style: ts(12, w: FontWeight.w600, lh: 16, color: picked.contains(r.id) ? C.grayC7 : C.sub)),
                             ]),
-                          )),
-                          if (i != rooms.length - 1) const Positioned(left: 58, right: 0, bottom: 0, child: HairLine()),
-                        ]),
+                          ),
+                        ),
                       ),
                   ]),
                 ),

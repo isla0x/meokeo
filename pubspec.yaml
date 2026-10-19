@@ -44,6 +44,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
           weight: 800
+    - family: BlackHanSans
+      fonts:
+        - asset: assets/fonts/BlackHanSans-Regular.ttf
+          weight: 400
     - family: Pretendard
       fonts:
         - asset: assets/fonts/Pretendard-Regular.otf

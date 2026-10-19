@@ -83,7 +83,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ]),
         ),
       ),
-      const HeaderTitle(sub: '함께 먹은 기록', title: '캘린더'),
+      const BigTitle(sub: '함께 먹은 기록', word: '캘린더', tail: ''),
     ];
 
     Widget body;
@@ -260,7 +260,7 @@ class _MonthCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(left: 10, right: 4),
             child: Row(children: [
-              Text('${month.year}년 ${month.month}월', style: ts(18, w: FontWeight.w700, lh: 22)),
+              Text('${month.year}년 ${month.month}월', style: th(22, lh: 28)),
               const Spacer(),
               arrow(Ic.chevLeftGray, '이전 달', onPrev),
               arrow(Ic.chevRightGray, '다음 달', canNext ? onNext : null),

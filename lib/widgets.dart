@@ -162,6 +162,32 @@ class HeaderTitle extends StatelessWidget {
       );
 }
 
+/// 큰 제목: "점심 뭐먹어요?"처럼 한 단어에 라임 형광펜
+class BigTitle extends StatelessWidget {
+  const BigTitle({super.key, required this.sub, required this.word, required this.tail});
+  final String sub;
+  final String word;
+  final String tail;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(sub, style: ts(14, w: FontWeight.w600, lh: 20, color: C.sub)),
+          const SizedBox(height: 6),
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(color: C.lime, borderRadius: BorderRadius.circular(14)),
+              child: Text(word, style: th(40, lh: 50)),
+            ),
+            const SizedBox(width: 8),
+            Flexible(child: Text(tail, maxLines: 1, style: th(40, lh: 50))),
+          ]),
+        ]),
+      );
+}
+
 /// 위쪽 안전 영역 + 9px (목업의 상태바 아래 여백)
 double topPad(BuildContext context) => MediaQuery.paddingOf(context).top + 9;
 
@@ -375,8 +401,8 @@ class SoftPill extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        height: 44,
-        decoration: BoxDecoration(color: C.fill12, borderRadius: BorderRadius.circular(22)),
+        height: 48,
+        decoration: BoxDecoration(color: C.white, borderRadius: BorderRadius.circular(24), boxShadow: kCardShadow),
         alignment: Alignment.center,
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           MIcon(icon, size: 18),
@@ -474,13 +500,13 @@ class PillBar extends StatelessWidget {
           onTap: () => onTab(i),
           child: Container(
             decoration: active
-                ? BoxDecoration(color: C.track, borderRadius: BorderRadius.circular(27))
+                ? BoxDecoration(color: C.lime, borderRadius: BorderRadius.circular(27))
                 : null,
             alignment: Alignment.center,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               MIcon(active ? on : off, size: 28),
               const SizedBox(height: 2),
-              Text(label, style: ts(10, w: active ? FontWeight.w600 : FontWeight.w500, lh: 12, color: C.sub)),
+              Text(label, style: ts(10, w: active ? FontWeight.w700 : FontWeight.w500, lh: 12, color: active ? C.accent : C.sub)),
             ]),
           ),
         ),
@@ -509,7 +535,7 @@ class PillBar extends StatelessWidget {
           child: Container(
             width: 64,
             height: 64,
-            decoration: const BoxDecoration(color: C.track, shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: C.lime, shape: BoxShape.circle),
             alignment: Alignment.center,
             child: const MIcon(Ic.camera, size: 30),
           ),

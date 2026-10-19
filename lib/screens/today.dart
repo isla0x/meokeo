@@ -79,7 +79,11 @@ class _TodayPageState extends State<TodayPage> with WidgetsBindingObserver {
           ]),
         ),
       ),
-      HeaderTitle(sub: '${t.month}월 ${t.day}일 ${kWeekdayKo[t.weekday - 1]}요일', title: '오늘'),
+      BigTitle(
+        sub: '${t.month}월 ${t.day}일 ${kWeekdayKo[t.weekday - 1]}요일',
+        word: (Meal.forPost(t) ?? Meal.breakfast).label,
+        tail: '뭐먹어요?',
+      ),
     ];
 
     Widget body;
@@ -210,14 +214,14 @@ class _BigHeader extends StatelessWidget {
           child: Row(children: [
             MealBadge(meal, size: 30),
             const SizedBox(width: 6),
-            Text(meal.label, style: ts(20, w: FontWeight.w700, lh: 25)),
+            Text(meal.label, style: th(24, lh: 30)),
             const SizedBox(width: 8),
             Container(
               height: 20,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: C.track, borderRadius: BorderRadius.circular(10)),
-              child: Text('지금', style: ts(12, w: FontWeight.w700, lh: 20, color: C.ink6)),
+              decoration: BoxDecoration(color: C.lime, borderRadius: BorderRadius.circular(10)),
+              child: Text('지금', style: ts(12, w: FontWeight.w700, lh: 20, color: C.accent)),
             ),
             const Spacer(),
             Text(meal.window(), style: ts(12, lh: 16, color: C.sub)),
@@ -332,7 +336,7 @@ class _BigCard extends StatelessWidget {
           child: Semantics(
             button: true,
             label: '나 ${meal.label} 사진 올리기',
-            child: Container(color: C.white, alignment: Alignment.center, child: const MIcon(Ic.camera, size: 40)),
+            child: Container(color: C.emptyTile, alignment: Alignment.center, child: const MIcon(Ic.camera, size: 40)),
           ),
         );
       }
@@ -358,19 +362,32 @@ class _BigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = <Widget>[];
-    for (var i = 0; i < slots.length; i += 2) {
-      final a = slots[i];
-      final b = i + 1 < slots.length ? slots[i + 1] : null;
-      if (rows.isNotEmpty) rows.add(const SizedBox(height: 2));
-      rows.add(SizedBox(
-        height: 104,
+    // 벤토: 가장 먼저 올라온 사진(없으면 첫 칸)을 크게, 나머지는 오른쪽에 세로로
+    var bigIdx = slots.indexWhere((s) => s.post != null);
+    if (bigIdx < 0) bigIdx = 0;
+    final rest = [for (var i = 0; i < slots.length; i++) if (i != bigIdx) slots[i]];
+    final gridClip = BorderRadius.circular(24);
+    final grid = ClipRRect(
+      borderRadius: gridClip,
+      child: SizedBox(
+        height: 216,
         child: Row(children: [
-          Expanded(child: _cell(context, a)),
-          if (b != null) ...[const SizedBox(width: 2), Expanded(child: _cell(context, b))],
+          Expanded(flex: 3, child: _cell(context, slots[bigIdx])),
+          if (rest.isNotEmpty) ...[
+            const SizedBox(width: 3),
+            Expanded(
+              flex: 2,
+              child: Column(children: [
+                for (var i = 0; i < rest.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 3),
+                  Expanded(child: _cell(context, rest[i])),
+                ],
+              ]),
+            ),
+          ],
         ]),
-      ));
-    }
+      ),
+    );
 
     final total = slots.length;
     final done = slots.where((s) => s.post != null).length;
@@ -387,42 +404,73 @@ class _BigCard extends StatelessWidget {
       tail = (!myDone && left == 1) ? ' · 나만 남았어요' : ' · $left명 남았어요';
     }
 
-    return CardBox(
-      clip: true,
-      child: Column(children: [
-        Container(color: C.white, child: Column(children: rows)),
+    final dotsRow = Row(mainAxisSize: MainAxisSize.min, children: [
+      for (var i = 0; i < total; i++)
         Container(
-          height: 46,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(children: [
-            Expanded(
-              child: Text.rich(
-                TextSpan(children: [
-                  TextSpan(text: lead),
-                  if (tail != null) TextSpan(text: tail, style: ts(15, w: FontWeight.w600, lh: 20, color: C.sub)),
-                ]),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: ts(15, w: FontWeight.w600, lh: 20),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              for (var i = 0; i < total; i++)
-                Container(
-                  width: 8,
-                  height: 8,
-                  margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: i < done ? C.accent : null,
-                    border: Border.all(color: i < done ? C.accent : C.grayAE, width: 1),
-                  ),
-                ),
-            ]),
-          ]),
+          width: 8,
+          height: 8,
+          margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: i < done ? C.accent : null,
+            border: Border.all(color: i < done ? C.accent : C.grayAE, width: 1),
+          ),
         ),
-      ]),
+    ]);
+
+    final Widget footer;
+    if (!myDone) {
+      footer = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => startPost(context, meal: meal),
+        child: Semantics(
+          button: true,
+          label: '내 ${meal.label} 올리기',
+          child: Container(
+            height: 64,
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(color: C.lime, borderRadius: BorderRadius.circular(24)),
+            child: Row(children: [
+              const MIcon(Ic.camera, size: 26),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('내 ${meal.label} 올리기', style: ts(16, w: FontWeight.w700, lh: 20, color: C.accent)),
+                  Text('$lead${tail ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: ts(12, lh: 16, color: C.accent)),
+                ]),
+              ),
+              dotsRow,
+            ]),
+          ),
+        ),
+      );
+    } else {
+      footer = Container(
+        height: 46,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(children: [
+          Expanded(
+            child: Text.rich(
+              TextSpan(children: [
+                TextSpan(text: lead),
+                if (tail != null) TextSpan(text: tail, style: ts(15, w: FontWeight.w600, lh: 20, color: C.sub)),
+              ]),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: ts(15, w: FontWeight.w600, lh: 20),
+            ),
+          ),
+          const SizedBox(width: 8),
+          dotsRow,
+        ]),
+      );
+    }
+
+    return CardBox(
+      radius: 32,
+      padding: const EdgeInsets.all(8),
+      child: Column(children: [grid, footer]),
     );
   }
 }

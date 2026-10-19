@@ -76,7 +76,7 @@ class InvitePage extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 160),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               SizedBox(height: topPad(context) + 44),
-              HeaderTitle(sub: created ? '방을 만들었어요' : '함께 먹는 사람들', title: '친구 초대하기'),
+              BigTitle(sub: created ? '방을 만들었어요' : '함께 먹는 사람들', word: '초대', tail: '해요'),
               const SizedBox(height: 14),
               CardBox(
                 clip: true,
@@ -116,39 +116,45 @@ class InvitePage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               CardBox(
-                padding: const EdgeInsets.all(16),
+                radius: 32,
+                color: C.accent,
+                shadows: const [BoxShadow(color: Color(0x4D14201E), offset: Offset(0, 12), blurRadius: 28)],
+                padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
                 child: Column(children: [
-                  Text('초대 코드', style: ts(12, lh: 16, color: C.sub)),
-                  const SizedBox(height: 10),
+                  Text('초대 코드', style: ts(13, w: FontWeight.w700, lh: 18, color: C.grayC7)),
+                  const SizedBox(height: 12),
                   Semantics(
                     label: '초대 코드 ${room.codeSpaced}',
                     child: CodeRow(chars: room.code.split('')),
                   ),
-                  const SizedBox(height: 12),
-                  Text('코드를 입력하면 바로 들어올 수 있어요', style: ts(12, lh: 16, color: C.sub)),
                   const SizedBox(height: 14),
-                  Row(children: [
-                    Expanded(
-                      child: SoftPill(
-                        icon: Ic.copy,
-                        label: '코드 복사',
-                        onTap: () async {
-                          await Clipboard.setData(ClipboardData(text: room.code));
-                          if (context.mounted) showToast(context, '초대 코드를 복사했어요');
-                        },
+                  Text('코드를 입력하면 바로 들어올 수 있어요', style: ts(12, lh: 16, color: C.grayC7)),
+                ]),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(children: [
+                  Expanded(
+                    child: SoftPill(
+                      icon: Ic.copy,
+                      label: '코드 복사',
+                      onTap: () async {
+                        await Clipboard.setData(ClipboardData(text: room.code));
+                        if (context.mounted) showToast(context, '초대 코드를 복사했어요');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SoftPill(
+                      icon: Ic.share,
+                      label: '공유하기',
+                      onTap: () => Share.share(
+                        '뭐먹어?에서 같이 먹어요!\n초대 코드: ${room.codeSpaced}\n앱에서 "코드로 참여하기"에 입력해 주세요.',
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SoftPill(
-                        icon: Ic.share,
-                        label: '공유하기',
-                        onTap: () => Share.share(
-                          '뭐먹어?에서 같이 먹어요!\n초대 코드: ${room.codeSpaced}\n앱에서 "코드로 참여하기"에 입력해 주세요.',
-                        ),
-                      ),
-                    ),
-                  ]),
+                  ),
                 ]),
               ),
               FooterNote('$kMaxMembers명이 모이면 더 이상 들어올 수 없어요.', top: 10),
