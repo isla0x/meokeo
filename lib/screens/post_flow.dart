@@ -231,7 +231,8 @@ class _PostSheetState extends State<PostSheet> {
                       SizedBox(
                         height: 60,
                         child: Stack(children: [
-                          Padding(
+                          Positioned.fill(
+                            child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Row(children: [
                               RoomBadge(rooms[i].icon, size: 32, glyph: 18, radius: 8),
@@ -255,7 +256,7 @@ class _PostSheetState extends State<PostSheet> {
                                 }),
                               ),
                             ]),
-                          ),
+                          )),
                           if (i != rooms.length - 1) const Positioned(left: 58, right: 0, bottom: 0, child: HairLine()),
                         ]),
                       ),

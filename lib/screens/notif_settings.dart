@@ -102,7 +102,8 @@ class NotifSettingsPage extends StatelessWidget {
       return SizedBox(
         height: 64,
         child: Stack(children: [
-          Padding(
+          Positioned.fill(
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(children: [
               MealBadge(m, size: 28),
@@ -138,7 +139,7 @@ class NotifSettingsPage extends StatelessWidget {
                 onChanged: (v) => _update(context, (n) => n.on[m] = v, turnedOn: v),
               ),
             ]),
-          ),
+          )),
           if (!last) const Positioned(left: 56, right: 0, bottom: 0, child: HairLine()),
         ]),
       );
@@ -148,7 +149,8 @@ class NotifSettingsPage extends StatelessWidget {
       return SizedBox(
         height: 60,
         child: Stack(children: [
-          Padding(
+          Positioned.fill(
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(children: [
               Expanded(
@@ -160,7 +162,7 @@ class NotifSettingsPage extends StatelessWidget {
               const SizedBox(width: 12),
               MSwitch(label: title, value: value, onChanged: onChanged),
             ]),
-          ),
+          )),
           if (!last) const Positioned(left: 16, right: 0, bottom: 0, child: HairLine()),
         ]),
       );
@@ -205,7 +207,7 @@ class NotifSettingsPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0x33FFFFFF),
+                    color: const Color.fromRGBO(160, 200, 255, 0.2),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(color: const Color(0x38FFFFFF), width: 0.5),
                   ),

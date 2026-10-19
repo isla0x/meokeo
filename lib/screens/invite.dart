@@ -89,7 +89,7 @@ class InvitePage extends StatelessWidget {
                       child: Row(children: [
                         RoomBadge(room.icon, size: 26, glyph: 16),
                         const SizedBox(width: 8),
-                        Flexible(
+                        Expanded(
                           child: Text(
                             room.name,
                             maxLines: 1,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
@@ -44,14 +45,13 @@ class Glass extends StatelessWidget {
       width: width,
       height: height,
       padding: padding,
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Color.fromRGBO(255, 255, 255, alpha),
         shape: shape,
         borderRadius: br,
         border: Border.all(color: const Color.fromRGBO(255, 255, 255, 0.8), width: 0.5),
       ),
-      child: child,
+      child: Center(widthFactor: 1, heightFactor: 1, child: child),
     );
     final Widget clipped = circle
         ? ClipOval(child: BackdropFilter(filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur), child: inner))
@@ -556,7 +556,7 @@ class _SheetRoute<T> extends PopupRoute<T> {
   final WidgetBuilder builder;
 
   @override
-  Color? get barrierColor => const Color(0x8C000000);
+  Color? get barrierColor => const Color(0xFF1C1C1E);
   @override
   bool get barrierDismissible => false;
   @override
@@ -572,10 +572,28 @@ class _SheetRoute<T> extends PopupRoute<T> {
   Widget buildTransitions(
       BuildContext context, Animation<double> animation, Animation<double> secondary, Widget child) {
     final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(curved),
-      child: child,
-    );
+    final cardTop = math.max(12.0, MediaQuery.paddingOf(context).top - 35);
+    return Stack(fit: StackFit.expand, children: [
+      Positioned(
+        left: 12,
+        right: 12,
+        top: cardTop,
+        height: 70,
+        child: FadeTransition(
+          opacity: curved,
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color(0xFF3A3A3E),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
+            ),
+          ),
+        ),
+      ),
+      SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(curved),
+        child: child,
+      ),
+    ]);
   }
 }
 

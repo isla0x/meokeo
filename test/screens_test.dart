@@ -100,9 +100,9 @@ List<Post> _defaultPosts() => [
       post('2026-10-19', Meal.breakfast, me, 'toast', h: 8, m: 2),
       post('2026-10-19', Meal.breakfast, 'doyun', 'cereal', h: 8, m: 20),
       post('2026-10-19', Meal.breakfast, 'seoyeon', 'yogurt', h: 8, m: 41),
-      post('2026-10-19', Meal.lunch, 'doyun', 'katsu', h: 12, m: 4),
-      post('2026-10-19', Meal.lunch, 'seoyeon', 'salad', h: 12, m: 9),
-      post('2026-10-19', Meal.lunch, 'jihun', 'bibim', h: 12, m: 15),
+      post('2026-10-19', Meal.lunch, 'doyun', 'katsu', text: '돈까스', h: 12, m: 4),
+      post('2026-10-19', Meal.lunch, 'seoyeon', 'salad', text: '샐러드', h: 12, m: 9),
+      post('2026-10-19', Meal.lunch, 'jihun', 'bibim', text: '비빔밥', h: 12, m: 15),
       // 18일 (캘린더에서 고르는 날)
       post('2026-10-18', Meal.breakfast, me, 'yogurt'),
       post('2026-10-18', Meal.breakfast, 'doyun', 'toast'),
@@ -127,7 +127,6 @@ Future<void> setup(WidgetTester tester, {double keyboard = 0}) async {
   debugDisableShadows = false;
   addTearDown(() {
     tester.view.reset();
-    debugDefaultTargetPlatformOverride = null;
     nowProvider = DateTime.now;
   });
 }
@@ -172,6 +171,18 @@ Future<void> finish(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
+/// 화면 사진 테스트 하나. 끝나면 (실패해도) 테스트용 설정을 원래대로 돌려놔요.
+void shotTest(String name, Future<void> Function(WidgetTester tester) body) {
+  testWidgets(name, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+      debugDisableShadows = true; // 테스트 기본값
+    }
+  });
+}
+
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -182,14 +193,14 @@ void main() {
     nowProvider = () => DateTime(2026, 10, 19, 12, 31);
   });
 
-  testWidgets('오늘 (점심 시간)', (tester) async {
+  shotTest('오늘 (점심 시간)', (tester) async {
     await setup(tester);
     await launch(tester, demo(), select: 'friends');
     await shot(tester, 'Today');
     await finish(tester);
   });
 
-  testWidgets('오늘 (저녁 시간)', (tester) async {
+  shotTest('오늘 (저녁 시간)', (tester) async {
     await setup(tester);
     nowProvider = () => DateTime(2026, 10, 19, 18, 10);
     await launch(tester, demo(), select: 'friends');
@@ -197,7 +208,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('오늘 (아침 전: 모두 잠김)', (tester) async {
+  shotTest('오늘 (아침 전: 모두 잠김)', (tester) async {
     await setup(tester);
     nowProvider = () => DateTime(2026, 10, 19, 6, 30);
     await launch(tester, demo(posts: []), select: 'friends');
@@ -205,14 +216,14 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('오늘 (방 없음)', (tester) async {
+  shotTest('오늘 (방 없음)', (tester) async {
     await setup(tester);
     await launch(tester, demo(rooms: [], posts: []));
     await shot(tester, 'Today_noroom');
     await finish(tester);
   });
 
-  testWidgets('캘린더', (tester) async {
+  shotTest('캘린더', (tester) async {
     await setup(tester);
     await launch(tester, demo(), home: const Shell(initialTab: 1), select: 'friends');
     await tester.tap(find.text('18'));
@@ -221,7 +232,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('올리기 시트', (tester) async {
+  shotTest('올리기 시트', (tester) async {
     await setup(tester);
     await launch(tester, demo(), select: 'friends');
     await openSheet(
@@ -234,7 +245,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('새 방 만들기 시트', (tester) async {
+  shotTest('새 방 만들기 시트', (tester) async {
     await setup(tester);
     await launch(tester, demo(), select: 'friends');
     await openSheet(tester, const RoomCreateSheet(initialName: '회사 동기', initialIcon: RoomIcon.people));
@@ -242,7 +253,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('코드로 참여하기 시트', (tester) async {
+  shotTest('코드로 참여하기 시트', (tester) async {
     await setup(tester, keyboard: 296);
     await launch(tester, demo(), select: 'friends');
     await openSheet(tester, const JoinRoomSheet(initialCode: 'K7M29', autofocus: false));
@@ -250,7 +261,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('친구 초대하기', (tester) async {
+  shotTest('친구 초대하기', (tester) async {
     await setup(tester);
     final r = room('new', '회사 동기', RoomIcon.people, [me]);
     await launch(tester, demo(rooms: [r], posts: []), home: InvitePage(initial: r, created: true));
@@ -258,7 +269,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('친구 초대하기 (4명 · 방장 아님)', (tester) async {
+  shotTest('친구 초대하기 (4명 · 방장 아님)', (tester) async {
     await setup(tester);
     final r = Room(id: 'x', name: '친구들', icon: RoomIcon.heart, ownerId: 'doyun', members: four, code: 'K7M29QX4');
     await launch(tester, demo(rooms: [r], posts: []), home: InvitePage(initial: r));
@@ -266,7 +277,7 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('알림 설정', (tester) async {
+  shotTest('알림 설정', (tester) async {
     await setup(tester);
     final state = await launch(tester, demo(), home: const NotifSettingsPage());
     expect(state.notif.on.values.every((v) => v), isTrue);
@@ -274,14 +285,14 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('이름 정하기', (tester) async {
+  shotTest('이름 정하기', (tester) async {
     await setup(tester);
     await launch(tester, demo(), home: const NicknamePage());
     await shot(tester, 'Nickname');
     await finish(tester);
   });
 
-  testWidgets('사진 크게 보기', (tester) async {
+  shotTest('사진 크게 보기', (tester) async {
     await setup(tester);
     final r = room('friends', '친구들', RoomIcon.people, four);
     final p = post('2026-10-19', Meal.lunch, 'doyun', 'katsu', text: '돈까스', h: 12, m: 4);
@@ -304,7 +315,7 @@ void main() {
     expect(s.peer, isFalse);
   });
 
-  testWidgets('캘린더 화면이 그려진다', (tester) async {
+  shotTest('캘린더 화면이 그려진다', (tester) async {
     await setup(tester);
     await launch(tester, demo(), home: const CalendarPage(), select: 'friends');
     expect(find.text('2026년 10월'), findsOneWidget);

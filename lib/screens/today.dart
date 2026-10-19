@@ -395,7 +395,7 @@ class _BigCard extends StatelessWidget {
           height: 46,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(children: [
-            Flexible(
+            Expanded(
               child: Text.rich(
                 TextSpan(children: [
                   TextSpan(text: lead),
@@ -415,8 +415,8 @@ class _BigCard extends StatelessWidget {
                   margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: slots[i].post != null ? C.teal : null,
-                    border: Border.all(color: slots[i].post != null ? C.teal : C.grayAE, width: 1),
+                    color: i < done ? C.teal : null,
+                    border: Border.all(color: i < done ? C.teal : C.grayAE, width: 1),
                   ),
                 ),
             ]),
