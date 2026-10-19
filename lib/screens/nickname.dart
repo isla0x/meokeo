@@ -1,88 +1,118 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
-import '../data.dart';
-import '../ui.dart';
+import '../repo/firebase_repo.dart' show errorDetail;
+import '../state.dart';
+import '../theme.dart';
+import '../widgets.dart';
 
-class NicknameScreen extends StatefulWidget {
-  const NicknameScreen({super.key, required this.onDone});
-  final VoidCallback onDone;
+/// 처음 켰을 때: 방 사람들에게 보일 이름 정하기
+class NicknamePage extends StatefulWidget {
+  const NicknamePage({super.key});
 
   @override
-  State<NicknameScreen> createState() => _NicknameScreenState();
+  State<NicknamePage> createState() => _NicknamePageState();
 }
 
-class _NicknameScreenState extends State<NicknameScreen> {
-  final _c = TextEditingController();
+class _NicknamePageState extends State<NicknamePage> {
+  final TextEditingController _ctl = TextEditingController();
   bool _busy = false;
 
   @override
   void initState() {
     super.initState();
-    _c.addListener(() => setState(() {}));
+    _ctl.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _c.dispose();
+    _ctl.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
-    final n = _c.text.trim();
-    if (n.isEmpty || _busy) return;
+  bool get _ready => _ctl.text.trim().isNotEmpty && !_busy;
+
+  Future<void> _go() async {
+    if (!_ready) return;
+    final app = AppScope.read(context);
     setState(() => _busy = true);
     try {
-      await Repo.instance.setNickname(n);
-      widget.onDone();
+      await app.saveNickname(_ctl.text);
     } catch (e) {
-      if (mounted) {
-        setState(() => _busy = false);
-        showMessage(context, '저장하지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})');
-      }
+      if (!mounted) return;
+      setState(() => _busy = false);
+      await showAlert(context, '저장하지 못했어요.\n인터넷을 확인해 주세요.\n(${errorDetail(e)})');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final kb = MediaQuery.viewInsetsOf(context).bottom;
     return CupertinoPageScaffold(
-      backgroundColor: kBand,
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 56, 0, 24),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text('뭐먹어?', style: font(34, FontWeight.w700, letterSpacing: -0.6).copyWith(color: kAccent)),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
-              child: Text('같이 먹는 사람들과 끼니를 나눠요', style: TextStyle(fontSize: 14, color: secondaryOf(context))),
-            ),
-            Section(
-              headerText: '별명',
-              footer: '방 친구들에게 보일 이름이에요. (최대 10자)',
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: CupertinoTextField(
-                    controller: _c,
-                    maxLength: 10,
-                    autofocus: true,
-                    placeholder: '예: 채은',
-                    decoration: null,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _save(),
+      backgroundColor: C.bg,
+      resizeToAvoidBottomInset: false,
+      child: Stack(children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: 150 + kb),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                SizedBox(height: topPad(context) + 64),
+                Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(88 * 0.225),
+                      boxShadow: const [BoxShadow(color: Color(0x1F1E3250), offset: Offset(0, 8), blurRadius: 20)],
+                    ),
+                    child: const AppMark(size: 88),
                   ),
                 ),
-              ],
+                const SizedBox(height: 22),
+                Center(child: Text('뭐먹어?', style: ts(28, w: FontWeight.w700, lh: 34, ls: 0.37))),
+                const SizedBox(height: 4),
+                Center(child: Text('함께 먹는 사람들과 하루 세 끼를 나눠요', style: ts(15, lh: 20, color: C.sub))),
+                const SizedBox(height: 28),
+                CardBox(
+                  child: Container(
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(children: [
+                      Text('이름', style: ts(15, w: FontWeight.w600, lh: 20)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: CupertinoTextField(
+                          controller: _ctl,
+                          autofocus: false,
+                          textAlign: TextAlign.right,
+                          padding: EdgeInsets.zero,
+                          decoration: null,
+                          maxLines: 1,
+                          style: ts(15, lh: 20),
+                          placeholder: '예: 지민',
+                          placeholderStyle: ts(15, lh: 20, color: C.gray8),
+                          cursorColor: C.teal,
+                          inputFormatters: [LengthLimitingTextInputFormatter(8)],
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _go(),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+                const FooterNote('방에 있는 사람들에게 보이는 이름이에요.'),
+              ]),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
-              child: PrimaryButton(label: '시작하기', onPressed: (_busy || _c.text.trim().isEmpty) ? null : _save),
-            ),
-          ],
+          ),
         ),
-      ),
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: kb > 0 ? kb + 12 : 34,
+          child: CtaButton(label: '시작하기', enabled: _ready, onTap: _go),
+        ),
+      ]),
     );
   }
 }

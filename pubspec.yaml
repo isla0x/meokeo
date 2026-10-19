@@ -1,7 +1,7 @@
 name: meokeo
 description: 아침·점심·저녁 사진을 앨범 대신 방에서 나누는 앱, 뭐먹어?
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
@@ -9,27 +9,41 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^2.0.0
+  flutter_localizations:
+    sdk: flutter
   firebase_core: ^3.8.0
   firebase_auth: ^5.3.0
   cloud_firestore: ^5.5.0
-  firebase_messaging: ^15.1.0
   image_picker: ^1.1.2
   share_plus: ^10.1.0
-  google_fonts: ^9.0.0
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
   flutter_timezone: ^3.0.1
   shared_preferences: ^2.3.0
+  path_drawing: ^1.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter:
-  uses-material-design: true
+  uses-material-design: false
+  assets:
+    - assets/illust/
   fonts:
-    # 한글은 Pretendard (코드의 font()가 영문·숫자는 Plus Jakarta Sans, 한글은 이 폰트로 보여줘요)
+    # 영문·숫자는 Plus Jakarta Sans, 한글은 Pretendard (목업과 같은 글꼴)
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
     - family: Pretendard
       fonts:
         - asset: assets/fonts/Pretendard-Regular.otf

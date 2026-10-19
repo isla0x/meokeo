@@ -4,27 +4,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'posts.dart';
+import 'models.dart';
 
-/// 끼니별 알림 설정 (켜짐 여부 + 시각)
-class MealAlarm {
-  MealAlarm({required this.enabled, required this.hour, required this.minute});
-  bool enabled;
-  int hour;
-  int minute;
+/// 알림 설정: 끼니별 켜짐/시각 + 마감 30분 전 + 방 사람이 올렸을 때
+class NotifSettings {
+  NotifSettings({
+    required this.on,
+    required this.minutes,
+    this.deadline = true,
+    this.peer = false,
+  });
+
+  final Map<Meal, bool> on;
+  final Map<Meal, int> minutes; // 하루 중 몇 분 (예: 12:00 → 720)
+  bool deadline;
+  bool peer;
+
+  factory NotifSettings.defaults() => NotifSettings(
+        on: {for (final m in Meal.values) m: true},
+        minutes: {for (final m in Meal.values) m: m.defaultAlarmMin},
+      );
+
+  NotifSettings copy() => NotifSettings(
+        on: Map.of(on),
+        minutes: Map.of(minutes),
+        deadline: deadline,
+        peer: peer,
+      );
 }
 
-const Map<Meal, List<int>> _defaultTimes = {
-  Meal.breakfast: [8, 30],
-  Meal.lunch: [12, 30],
-  Meal.dinner: [19, 0],
-};
-
-const Map<Meal, String> _bodies = {
-  Meal.breakfast: '아침은 뭐 먹었어? 방 친구들에게 사진을 올려 봐요 🌅',
-  Meal.lunch: '점심은 뭐 먹었어? 방 친구들에게 사진을 올려 봐요 ☀️',
-  Meal.dinner: '저녁은 뭐 먹었어? 방 친구들에게 사진을 올려 봐요 🌙',
-};
+const _details = NotificationDetails(
+  iOS: DarwinNotificationDetails(presentAlert: true, presentBanner: true, presentSound: true),
+);
 
 class Notifier {
   Notifier._();
@@ -53,61 +64,120 @@ class Notifier {
   }
 
   Future<bool> requestPermission() async {
-    await init();
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
-    return await ios?.requestPermissions(alert: true, sound: true, badge: false) ?? false;
-  }
-
-  Future<Map<Meal, MealAlarm>> load() async {
-    final sp = await SharedPreferences.getInstance();
-    return {
-      for (final m in Meal.values)
-        m: MealAlarm(
-          enabled: sp.getBool('alarm_${m.name}_on') ?? false,
-          hour: sp.getInt('alarm_${m.name}_h') ?? _defaultTimes[m]![0],
-          minute: sp.getInt('alarm_${m.name}_m') ?? _defaultTimes[m]![1],
-        ),
-    };
-  }
-
-  Future<void> save(Map<Meal, MealAlarm> alarms) async {
-    final sp = await SharedPreferences.getInstance();
-    for (final e in alarms.entries) {
-      await sp.setBool('alarm_${e.key.name}_on', e.value.enabled);
-      await sp.setInt('alarm_${e.key.name}_h', e.value.hour);
-      await sp.setInt('alarm_${e.key.name}_m', e.value.minute);
+    try {
+      await init();
+      final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      return await ios?.requestPermissions(alert: true, sound: true, badge: false) ?? false;
+    } catch (_) {
+      return false;
     }
-    await _schedule(alarms);
+  }
+
+  // ───────── 저장 ─────────
+  Future<NotifSettings> load() async {
+    final sp = await SharedPreferences.getInstance();
+    final s = NotifSettings.defaults();
+    for (final m in Meal.values) {
+      s.on[m] = sp.getBool('alarm_${m.name}_on') ?? true;
+      s.minutes[m] = sp.getInt('alarm_${m.name}_min') ?? m.defaultAlarmMin;
+    }
+    s.deadline = sp.getBool('alarm_deadline') ?? true;
+    s.peer = sp.getBool('alarm_peer') ?? false;
+    return s;
+  }
+
+  Future<void> save(NotifSettings s) async {
+    final sp = await SharedPreferences.getInstance();
+    for (final m in Meal.values) {
+      await sp.setBool('alarm_${m.name}_on', s.on[m] ?? true);
+      await sp.setInt('alarm_${m.name}_min', s.minutes[m] ?? m.defaultAlarmMin);
+    }
+    await sp.setBool('alarm_deadline', s.deadline);
+    await sp.setBool('alarm_peer', s.peer);
+    await reschedule(s);
+  }
+
+  // ───────── "이미 올렸어요" 기록 (마감 알림에서 빼려고) ─────────
+  Future<void> markPosted(DateTime day, Meal meal) async {
+    final sp = await SharedPreferences.getInstance();
+    final keys = sp.getStringList('posted_keys') ?? <String>[];
+    final k = '${dayKey(day)}_${meal.name}';
+    if (!keys.contains(k)) {
+      keys.add(k);
+      // 오래된 기록은 정리 (최근 40개만)
+      final trimmed = keys.length > 40 ? keys.sublist(keys.length - 40) : keys;
+      await sp.setStringList('posted_keys', trimmed);
+    }
+    await reschedule(await load());
+  }
+
+  Future<Set<String>> _posted() async {
+    final sp = await SharedPreferences.getInstance();
+    return (sp.getStringList('posted_keys') ?? const <String>[]).toSet();
   }
 
   /// 앱을 켤 때 저장된 설정대로 다시 예약해요.
   Future<void> restore() async {
-    await init();
-    await _schedule(await load());
+    try {
+      await reschedule(await load());
+    } catch (_) {}
   }
 
-  Future<void> _schedule(Map<Meal, MealAlarm> alarms) async {
-    await init();
-    await _plugin.cancelAll();
-    for (final e in alarms.entries) {
-      if (!e.value.enabled) continue;
-      final now = tz.TZDateTime.now(tz.local);
-      var when = tz.TZDateTime(tz.local, now.year, now.month, now.day, e.value.hour, e.value.minute);
-      if (!when.isAfter(now)) when = when.add(const Duration(days: 1));
-      await _plugin.zonedSchedule(
-        e.key.index + 1,
-        '뭐먹어? ${e.key.emoji}',
-        _bodies[e.key]!,
-        when,
-        const NotificationDetails(
-          iOS: DarwinNotificationDetails(presentAlert: true, presentSound: true),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
+  Future<void> reschedule(NotifSettings s) async {
+    try {
+      await init();
+      await _plugin.cancelAll();
+      final nowT = tz.TZDateTime.now(tz.local);
+      final posted = await _posted();
+
+      for (final m in Meal.values) {
+        // 1) 식사 알림: 매일 같은 시각
+        if (s.on[m] ?? true) {
+          final min = s.minutes[m] ?? m.defaultAlarmMin;
+          var when = tz.TZDateTime(tz.local, nowT.year, nowT.month, nowT.day, min ~/ 60, min % 60);
+          if (!when.isAfter(nowT)) when = when.add(const Duration(days: 1));
+          await _plugin.zonedSchedule(
+            m.index + 1,
+            '냠냠 시간',
+            '${m.label} 뭐먹어요?',
+            when,
+            _details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+          );
+        }
+
+        // 2) 마감 30분 전: 앞으로 7일, 이미 올린 끼니는 빼요
+        if (s.deadline) {
+          for (var d = 0; d < 7; d++) {
+            final day = nowT.add(Duration(days: d));
+            if (posted.contains('${dayKey(day)}_${m.name}')) continue;
+            final at = m.endMin - 30;
+            final when = tz.TZDateTime(tz.local, day.year, day.month, day.day, at ~/ 60, at % 60);
+            if (!when.isAfter(nowT)) continue;
+            await _plugin.zonedSchedule(
+              100 + d * 3 + m.index,
+              '마감 30분 전',
+              '아직 ${m.label}을 안 올렸어요',
+              when,
+              _details,
+              androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+              uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            );
+          }
+        }
+      }
+    } catch (_) {
+      // 알림은 부가 기능이라, 실패해도 앱은 계속 써요.
     }
+  }
+
+  /// 앱을 쓰는 중에 방 사람이 올렸을 때 바로 띄우는 알림
+  Future<void> showNow(String title, String body) async {
+    try {
+      await init();
+      await _plugin.show(900 + DateTime.now().millisecond % 90, title, body, _details);
+    } catch (_) {}
   }
 }
