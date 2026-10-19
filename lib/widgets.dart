@@ -558,17 +558,51 @@ class AppMark extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size * 0.225),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFFFFFF), Color(0xFFF4F5F8)],
-        ),
         boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 0, spreadRadius: 0.5)],
       ),
-      alignment: Alignment.center,
-      child: MIcon(Ic.diningGrad, height: size * 0.48),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.225),
+        child: CustomPaint(painter: const _AppMarkPainter()),
+      ),
     );
   }
+}
+
+/// 앱 아이콘 그림: 그릇에 꽂힌 젓가락 두 알약 (1024 기준 좌표)
+class _AppMarkPainter extends CustomPainter {
+  const _AppMarkPainter();
+
+  static const _cream = Color(0xFFF6F2EA);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 1024;
+    canvas.save();
+    canvas.scale(s);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1024, 1024), Paint()..color = _cream);
+
+    void pill(double cx, double cy, double deg, Color c) {
+      canvas.save();
+      canvas.translate(cx, cy);
+      canvas.rotate(deg * math.pi / 180);
+      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-59, -250, 118, 500), const Radius.circular(59)), Paint()..color = c);
+      canvas.restore();
+    }
+
+    pill(449.1, 452.7, -26, C.lime);
+    pill(608.1, 449.6, 16, C.accent);
+    // 그릇 위쪽 틈
+    canvas.drawRect(const Rect.fromLTWH(242, 534, 540, 18), Paint()..color = _cream);
+    final bowl = Path()
+      ..moveTo(242, 552)
+      ..lineTo(782, 552)
+      ..arcToPoint(const Offset(242, 552), radius: const Radius.circular(270), clockwise: true);
+    canvas.drawPath(bowl, Paint()..color = C.accent);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ───────────────────────── 아래 시트 (취소 / 제목) ─────────────────────────
