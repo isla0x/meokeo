@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data.dart';
 import '../theme.dart';
-import 'invite.dart';
+import 'room_screen.dart';
 import 'join_room.dart';
 import 'room_create.dart';
 
@@ -95,7 +95,7 @@ class _RoomTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => InviteScreen(roomId: room.id))),
+            .push(MaterialPageRoute(builder: (_) => RoomScreen(roomId: room.id))),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
