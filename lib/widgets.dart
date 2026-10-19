@@ -182,7 +182,16 @@ class BigTitle extends StatelessWidget {
               child: Text(word, style: th(40, lh: 50)),
             ),
             const SizedBox(width: 8),
-            Flexible(child: Text(tail, maxLines: 1, style: th(40, lh: 50))),
+            Flexible(
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: tail.replaceAll('?', '')),
+                  if (tail.contains('?')) TextSpan(text: '?', style: ts(38, w: FontWeight.w800, lh: 50, color: C.accent)),
+                ]),
+                maxLines: 1,
+                style: th(40, lh: 50),
+              ),
+            ),
           ]),
         ]),
       );
@@ -585,18 +594,18 @@ class _AppMarkPainter extends CustomPainter {
       canvas.save();
       canvas.translate(cx, cy);
       canvas.rotate(deg * math.pi / 180);
-      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-59, -250, 118, 500), const Radius.circular(59)), Paint()..color = c);
+      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-65, -165, 130, 330), const Radius.circular(65)), Paint()..color = c);
       canvas.restore();
     }
 
-    pill(449.1, 452.7, -26, C.lime);
-    pill(608.1, 449.6, 16, C.accent);
+    pill(433.2, 414.8, -22, C.lime);
+    pill(640.1, 410.2, 12, C.accent);
     // 그릇 위쪽 틈
-    canvas.drawRect(const Rect.fromLTWH(242, 534, 540, 18), Paint()..color = _cream);
+    canvas.drawRect(const Rect.fromLTWH(233, 498, 558, 22), Paint()..color = _cream);
     final bowl = Path()
-      ..moveTo(242, 552)
-      ..lineTo(782, 552)
-      ..arcToPoint(const Offset(242, 552), radius: const Radius.circular(270), clockwise: true);
+      ..moveTo(233, 520)
+      ..lineTo(791, 520)
+      ..arcToPoint(const Offset(233, 520), radius: const Radius.circular(279), clockwise: true);
     canvas.drawPath(bowl, Paint()..color = C.accent);
     canvas.restore();
   }

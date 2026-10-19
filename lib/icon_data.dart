@@ -32,7 +32,7 @@ class IconSpec {
   final List<IconPrim> prims;
 }
 
-const IconGrad _tealGrad = IconGrad(-30, 30, Color(0xFF63B3AC), Color(0xFF2A7873));
+const IconGrad _tealGrad = IconGrad(-30, 30, Color(0xFF5A6A66), Color(0xFF14201E));
 const IconShadow _tealShadow = IconShadow(0, 3, 2.6, Color(0x571F6B66));
 
 abstract final class Ic {
@@ -54,8 +54,8 @@ abstract final class Ic {
   ]);
 
   static const peopleDuo = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M14.4 9A2.8 2.8 0 1 0 20 9A2.8 2.8 0 1 0 14.4 9Z', fill: Color(0xFF2F7F7A)),
-    IconPrim('M15.2 14.1c.7-.2 1.4-.3 2.1-.3 2.8 0 4.6 1.9 4.6 5.2h-4.8c0-2.2-.6-3.9-1.9-4.9z', fill: Color(0xFF2F7F7A)),
+    IconPrim('M14.4 9A2.8 2.8 0 1 0 20 9A2.8 2.8 0 1 0 14.4 9Z', fill: Color(0xFF14201E)),
+    IconPrim('M15.2 14.1c.7-.2 1.4-.3 2.1-.3 2.8 0 4.6 1.9 4.6 5.2h-4.8c0-2.2-.6-3.9-1.9-4.9z', fill: Color(0xFF14201E)),
     IconPrim('M5.5 8.6A3.5 3.5 0 1 0 12.5 8.6A3.5 3.5 0 1 0 5.5 8.6Z', fill: Color(0xFF1C1C1E), stroke: Color(0xFFFFFFFF), sw: 1.2, cap: StrokeCap.butt, join: StrokeJoin.miter),
     IconPrim('M2.6 19.6c0-3.8 2.8-6 6.4-6s6.4 2.2 6.4 6z', fill: Color(0xFF1C1C1E), stroke: Color(0xFFFFFFFF), sw: 1.2, cap: StrokeCap.butt, join: StrokeJoin.round),
   ]);
@@ -63,7 +63,7 @@ abstract final class Ic {
   static const bell = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
     IconPrim('M6 16.2v-5a6 6 0 0 1 12 0v5l1.5 2H4.5z', fill: Color(0x121C1C1E), stroke: Color(0xFF1C1C1E), sw: 1.8, cap: StrokeCap.butt, join: StrokeJoin.round),
     IconPrim('M10 20.8a2 2 0 0 0 4 0', stroke: Color(0xFF1C1C1E), sw: 1.8, cap: StrokeCap.round, join: StrokeJoin.round),
-    IconPrim('M14.7 5.6A3.3 3.3 0 1 0 21.3 5.6A3.3 3.3 0 1 0 14.7 5.6Z', fill: Color(0xFF2F7F7A), stroke: Color(0xFFFFFFFF), sw: 1.5, cap: StrokeCap.butt, join: StrokeJoin.miter),
+    IconPrim('M14.7 5.6A3.3 3.3 0 1 0 21.3 5.6A3.3 3.3 0 1 0 14.7 5.6Z', fill: Color(0xFF14201E), stroke: Color(0xFFFFFFFF), sw: 1.5, cap: StrokeCap.butt, join: StrokeJoin.miter),
   ]);
 
   static const bellPlain = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
@@ -72,9 +72,9 @@ abstract final class Ic {
   ]);
 
   static const bowlOn = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M3 11.2h18c0 5-4 9-9 9s-9-4-9-9z', fill: Color(0xFF2F7F7A)),
+    IconPrim('M3 11.2h18c0 5-4 9-9 9s-9-4-9-9z', fill: Color(0xFF14201E)),
     IconPrim('M3.4 12.6h17.2', fill: Color(0xD9000000), stroke: Color(0xD9FFFFFF), sw: 1.2, cap: StrokeCap.round, join: StrokeJoin.miter),
-    IconPrim('M8 7.2c0-1.1 1-1.5 1-2.7M12 7.2c0-1.1 1-1.5 1-2.7M16 7.2c0-1.1 1-1.5 1-2.7', stroke: Color(0xFF2F7F7A), sw: 1.7, cap: StrokeCap.round, join: StrokeJoin.round),
+    IconPrim('M8 7.2c0-1.1 1-1.5 1-2.7M12 7.2c0-1.1 1-1.5 1-2.7M16 7.2c0-1.1 1-1.5 1-2.7', stroke: Color(0xFF14201E), sw: 1.7, cap: StrokeCap.round, join: StrokeJoin.round),
   ]);
 
   static const bowlOff = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
@@ -83,9 +83,9 @@ abstract final class Ic {
   ]);
 
   static const calOn = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M7.6 4.8H16.4A4.2 4.2 0 0 1 20.6 9V16.8A4.2 4.2 0 0 1 16.4 21H7.6A4.2 4.2 0 0 1 3.4 16.8V9A4.2 4.2 0 0 1 7.6 4.8Z', fill: Color(0xFF2F7F7A)),
+    IconPrim('M7.6 4.8H16.4A4.2 4.2 0 0 1 20.6 9V16.8A4.2 4.2 0 0 1 16.4 21H7.6A4.2 4.2 0 0 1 3.4 16.8V9A4.2 4.2 0 0 1 7.6 4.8Z', fill: Color(0xFF14201E)),
     IconPrim('M3.4 10.2h17.2', fill: Color(0xD9000000), stroke: Color(0xD9FFFFFF), sw: 1.2, cap: StrokeCap.butt, join: StrokeJoin.miter),
-    IconPrim('M8.2 2.8v3.6M15.8 2.8v3.6', stroke: Color(0xFF2F7F7A), sw: 2, cap: StrokeCap.round, join: StrokeJoin.round),
+    IconPrim('M8.2 2.8v3.6M15.8 2.8v3.6', stroke: Color(0xFF14201E), sw: 2, cap: StrokeCap.round, join: StrokeJoin.round),
     IconPrim('M6.5 15.6A1.5 1.5 0 1 0 9.5 15.6A1.5 1.5 0 1 0 6.5 15.6Z', fill: Color(0xFFFFFFFF)),
     IconPrim('M10.5 15.6A1.5 1.5 0 1 0 13.5 15.6A1.5 1.5 0 1 0 10.5 15.6Z', fill: Color(0xFFFFFFFF)),
     IconPrim('M14.5 15.6A1.5 1.5 0 1 0 17.5 15.6A1.5 1.5 0 1 0 14.5 15.6Z', fill: Color(0xFFFFFFFF)),
@@ -102,7 +102,7 @@ abstract final class Ic {
   static const camera = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
     IconPrim('M3.6 9A3 3 0 0 1 6.6 6h1l1.2-2h6.4l1.2 2h1A3 3 0 0 1 20.4 9v7.6a3 3 0 0 1-3 3H6.6a3 3 0 0 1-3-3z', fill: Color(0xFF636366)),
     IconPrim('M7.4 12.8A4.6 4.6 0 1 0 16.6 12.8A4.6 4.6 0 1 0 7.4 12.8Z', fill: Color(0xFFFFFFFF)),
-    IconPrim('M9 12.8A3 3 0 1 0 15 12.8A3 3 0 1 0 9 12.8Z', fill: Color(0xFF2F7F7A)),
+    IconPrim('M9 12.8A3 3 0 1 0 15 12.8A3 3 0 1 0 9 12.8Z', fill: Color(0xFF14201E)),
     IconPrim('M9.9 11.6A0.9 0.9 0 1 0 11.7 11.6A0.9 0.9 0 1 0 9.9 11.6Z', fill: Color(0xD9FFFFFF)),
     IconPrim('M16.7 9A0.9 0.9 0 1 0 18.5 9A0.9 0.9 0 1 0 16.7 9Z', fill: Color(0xCCFFFFFF)),
   ]);
@@ -172,18 +172,18 @@ abstract final class Ic {
   ]);
 
   static const copy = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M11.3 8.5H17.2A2.8 2.8 0 0 1 20 11.3V17.2A2.8 2.8 0 0 1 17.2 20H11.3A2.8 2.8 0 0 1 8.5 17.2V11.3A2.8 2.8 0 0 1 11.3 8.5Z', stroke: Color(0xFF2F7F7A), sw: 1.9, cap: StrokeCap.butt, join: StrokeJoin.miter),
-    IconPrim('M15.5 8.5V6.8A2.8 2.8 0 0 0 12.7 4H6.8A2.8 2.8 0 0 0 4 6.8v5.9a2.8 2.8 0 0 0 2.8 2.8h1.7', stroke: Color(0xFF2F7F7A), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
+    IconPrim('M11.3 8.5H17.2A2.8 2.8 0 0 1 20 11.3V17.2A2.8 2.8 0 0 1 17.2 20H11.3A2.8 2.8 0 0 1 8.5 17.2V11.3A2.8 2.8 0 0 1 11.3 8.5Z', stroke: Color(0xFF14201E), sw: 1.9, cap: StrokeCap.butt, join: StrokeJoin.miter),
+    IconPrim('M15.5 8.5V6.8A2.8 2.8 0 0 0 12.7 4H6.8A2.8 2.8 0 0 0 4 6.8v5.9a2.8 2.8 0 0 0 2.8 2.8h1.7', stroke: Color(0xFF14201E), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
   ]);
 
   static const share = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M12 14.6V3.8M8.2 7.4 12 3.6l3.8 3.8', stroke: Color(0xFF2F7F7A), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
-    IconPrim('M8.6 10H7.2A2.2 2.2 0 0 0 5 12.2v6.2A2.2 2.2 0 0 0 7.2 20.6h9.6A2.2 2.2 0 0 0 19 18.4v-6.2A2.2 2.2 0 0 0 16.8 10h-1.4', stroke: Color(0xFF2F7F7A), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
+    IconPrim('M12 14.6V3.8M8.2 7.4 12 3.6l3.8 3.8', stroke: Color(0xFF14201E), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
+    IconPrim('M8.6 10H7.2A2.2 2.2 0 0 0 5 12.2v6.2A2.2 2.2 0 0 0 7.2 20.6h9.6A2.2 2.2 0 0 0 19 18.4v-6.2A2.2 2.2 0 0 0 16.8 10h-1.4', stroke: Color(0xFF14201E), sw: 1.9, cap: StrokeCap.round, join: StrokeJoin.round),
   ]);
 
   static const clipboard = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
-    IconPrim('M8 5.5H16A3 3 0 0 1 19 8.5V17.5A3 3 0 0 1 16 20.5H8A3 3 0 0 1 5 17.5V8.5A3 3 0 0 1 8 5.5Z', stroke: Color(0xFF2F7F7A), sw: 1.9, cap: StrokeCap.butt, join: StrokeJoin.miter),
-    IconPrim('M10.6 3H13.4A2 2 0 0 1 15.4 5V6A2 2 0 0 1 13.4 8H10.6A2 2 0 0 1 8.6 6V5A2 2 0 0 1 10.6 3Z', fill: Color(0xFF2F7F7A)),
+    IconPrim('M8 5.5H16A3 3 0 0 1 19 8.5V17.5A3 3 0 0 1 16 20.5H8A3 3 0 0 1 5 17.5V8.5A3 3 0 0 1 8 5.5Z', stroke: Color(0xFF14201E), sw: 1.9, cap: StrokeCap.butt, join: StrokeJoin.miter),
+    IconPrim('M10.6 3H13.4A2 2 0 0 1 15.4 5V6A2 2 0 0 1 13.4 8H10.6A2 2 0 0 1 8.6 6V5A2 2 0 0 1 10.6 3Z', fill: Color(0xFF14201E)),
   ]);
 
   static const plus = IconSpec(<double>[0, 0, 24, 24], <IconPrim>[
