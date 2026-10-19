@@ -3,16 +3,16 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart' show Color, IconData, Icons;
+import 'package:flutter/cupertino.dart' show Color, CupertinoIcons, IconData;
 
-import 'theme.dart';
+import 'ui.dart';
 
 enum MealPhase { upcoming, now, past }
 
 enum Meal {
-  breakfast('아침', '🌅', 7 * 60, 9 * 60 + 30, Icons.wb_twilight_rounded, kSunrise),
-  lunch('점심', '☀️', 11 * 60 + 30, 13 * 60, Icons.wb_sunny_rounded, kTeal),
-  dinner('저녁', '🌙', 17 * 60, 19 * 60, Icons.nightlight_round, kMoon);
+  breakfast('아침', '🌅', 7 * 60, 9 * 60 + 30, CupertinoIcons.sunrise_fill, kSunrise),
+  lunch('점심', '☀️', 11 * 60 + 30, 13 * 60, CupertinoIcons.sun_max_fill, kSun),
+  dinner('저녁', '🌙', 17 * 60, 19 * 60, CupertinoIcons.moon_fill, kMoon);
 
   const Meal(this.label, this.emoji, this.fromMin, this.toMin, this.icon, this.color);
   final String label;
@@ -28,6 +28,8 @@ enum Meal {
     final h12 = h % 12 == 0 ? 12 : h % 12;
     return '${period ? '$per ' : ''}$h12:${mi.toString().padLeft(2, '0')}';
   }
+
+  String get startLabel => _c(fromMin);
 
   String get window {
     final samePeriod = (fromMin ~/ 60 < 12) == (toMin ~/ 60 < 12);

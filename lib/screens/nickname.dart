@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../data.dart';
-import '../theme.dart';
+import '../ui.dart';
 
 class NicknameScreen extends StatefulWidget {
   const NicknameScreen({super.key, required this.onDone});
@@ -14,6 +14,12 @@ class NicknameScreen extends StatefulWidget {
 class _NicknameScreenState extends State<NicknameScreen> {
   final _c = TextEditingController();
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _c.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -31,39 +37,50 @@ class _NicknameScreenState extends State<NicknameScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('저장하지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})')));
+        showMessage(context, '저장하지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              const Text('뭐먹어?',
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: kTeal)),
-              const SizedBox(height: 8),
-              const Text('방 친구들에게 보일 별명을 정해 주세요.',
-                  style: TextStyle(fontSize: 16, color: kMuted)),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _c,
-                maxLength: 10,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _save(),
-                decoration: const InputDecoration(hintText: '별명 (최대 10자)'),
-              ),
-              const Spacer(flex: 2),
-              FilledButton(onPressed: _busy ? null : _save, child: const Text('시작하기')),
-            ],
-          ),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(0, 56, 0, 24),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text('뭐먹어?', style: font(34, FontWeight.w700, letterSpacing: -0.6).copyWith(color: kAccent)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
+              child: Text('같이 먹는 사람들과 끼니를 나눠요', style: TextStyle(fontSize: 14, color: secondaryOf(context))),
+            ),
+            Section(
+              headerText: '별명',
+              footer: '방 친구들에게 보일 이름이에요. (최대 10자)',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: CupertinoTextField(
+                    controller: _c,
+                    maxLength: 10,
+                    autofocus: true,
+                    placeholder: '예: 채은',
+                    decoration: null,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _save(),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
+              child: PrimaryButton(label: '시작하기', onPressed: (_busy || _c.text.trim().isEmpty) ? null : _save),
+            ),
+          ],
         ),
       ),
     );

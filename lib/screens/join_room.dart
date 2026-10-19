@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../data.dart';
-import '../theme.dart';
-import '../widgets.dart';
+import '../ui.dart';
 import 'invite.dart';
 
 class JoinRoomScreen extends StatefulWidget {
@@ -15,7 +14,6 @@ class JoinRoomScreen extends StatefulWidget {
 
 class _JoinRoomScreenState extends State<JoinRoomScreen> {
   final _code = TextEditingController();
-  final _focus = FocusNode();
   bool _busy = false;
 
   @override
@@ -27,7 +25,6 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   @override
   void dispose() {
     _code.dispose();
-    _focus.dispose();
     super.dispose();
   }
 
@@ -50,8 +47,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
     try {
       final room = await Repo.instance.joinByCode(_code.text);
       if (!mounted) return;
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => InviteScreen(roomId: room.id)));
+      Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (_) => InviteScreen(roomId: room.id)));
     } on AppException catch (e) {
       _fail(e.message);
     } catch (e) {
@@ -62,77 +58,39 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   void _fail(String msg) {
     if (!mounted) return;
     setState(() => _busy = false);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    showMessage(context, msg);
   }
 
   @override
   Widget build(BuildContext context) {
-    final code = _code.text;
-    final ready = code.length == kCodeLength;
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-          child: Column(children: [
-            Stack(alignment: Alignment.center, children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                    child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-                ),
-              ),
-              const Text('코드로 참여하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-            ]),
-            const SizedBox(height: 26),
-            SizedBox(
-              height: 52,
-              child: Stack(alignment: Alignment.center, children: [
-                for (final e in const [['🥗', -52.0], ['🍲', 0.0], ['🍱', 52.0]])
-                  Transform.translate(
-                    offset: Offset(e[1] as double, 0),
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          color: Colors.white, shape: BoxShape.circle, boxShadow: softShadow()),
-                      child: Text(e[0] as String, style: const TextStyle(fontSize: 26)),
-                    ),
-                  ),
-              ]),
-            ),
-            const SizedBox(height: 18),
-            const Text('초대 코드를 입력해요', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 6),
-            const Text('친구가 보내 준 8자리 코드예요', style: TextStyle(color: kMuted)),
-            const SizedBox(height: 22),
-            GestureDetector(
-              onTap: () => _focus.requestFocus(),
-              child: CodeBoxes(
-                code: code,
-                activeIndex: code.length < kCodeLength ? code.length : null,
-                size: 34,
-              ),
-            ),
-            // 실제 입력은 보이지 않는 입력창이 받아요
-            SizedBox(
-              height: 1,
-              child: Opacity(
-                opacity: 0,
-                child: TextField(
+    final ready = _code.text.length == kCodeLength;
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.systemGroupedBackground,
+        automaticallyImplyLeading: false,
+        leading: NavTextButton('취소', () => Navigator.of(context).pop()),
+        middle: const Text('코드로 참여하기'),
+      ),
+      child: SafeArea(
+        child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+          Section(
+            headerText: '초대 코드',
+            footer: '친구가 보내 준 8자리 코드예요.',
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: CupertinoTextField(
                   controller: _code,
-                  focusNode: _focus,
                   autofocus: true,
+                  maxLength: kCodeLength,
+                  textAlign: TextAlign.center,
                   textCapitalization: TextCapitalization.characters,
-                  keyboardType: TextInputType.visiblePassword,
                   autocorrect: false,
                   enableSuggestions: false,
+                  placeholder: 'K7M29QX4',
+                  decoration: null,
+                  style: font(26, FontWeight.w700, letterSpacing: 5),
                   inputFormatters: [
                     TextInputFormatter.withFunction((o, n) {
                       final t = _clean(n.text);
@@ -142,28 +100,19 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                   onSubmitted: (_) => _join(),
                 ),
               ),
-            ),
-            const SizedBox(height: 18),
-            GestureDetector(
-              onTap: _paste,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(
-                    color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: softShadow()),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.content_paste_rounded, size: 16, color: kTeal),
-                  SizedBox(width: 6),
-                  Text('복사한 코드 붙여넣기', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                ]),
+              Row1(
+                leading: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: kAccent),
+                title: '복사한 코드 붙여넣기',
+                titleColor: CupertinoDynamicColor.resolve(kAccentDeep, context),
+                onTap: _paste,
               ),
-            ),
-            const Spacer(),
-            BigButton(
-              label: _busy ? '참여하는 중…' : '참여하기',
-              onPressed: (ready && !_busy) ? _join : null,
-            ),
-          ]),
-        ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
+            child: PrimaryButton(label: _busy ? '참여하는 중…' : '참여하기', onPressed: (ready && !_busy) ? _join : null),
+          ),
+        ]),
       ),
     );
   }

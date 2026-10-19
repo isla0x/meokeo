@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'data.dart';
 import 'firebase_options.dart';
 import 'notifications.dart';
-import 'screens/home.dart';
 import 'screens/nickname.dart';
-import 'theme.dart';
+import 'screens/root.dart';
+import 'ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +20,31 @@ class MeokeoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: '뭐먹어?',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
+      theme: CupertinoThemeData(
+        primaryColor: kAccent,
+        textTheme: CupertinoTextThemeData(
+          textStyle: font(15, FontWeight.w500, letterSpacing: -0.2),
+          navLargeTitleTextStyle: font(28, FontWeight.w700, letterSpacing: -0.4),
+          navTitleTextStyle: font(16, FontWeight.w600),
+          tabLabelTextStyle: font(10, FontWeight.w500, letterSpacing: -0.1),
+        ),
+      ),
+      // 아이폰 설정의 글자 크기는 그대로 반영하면서 앱 전체 글자를 조금 키워요. (하루링과 같아요)
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final scale = (mq.textScaler.scale(1.0) * kTextBoost).clamp(1.0, 1.6).toDouble();
+        return MediaQuery(
+          data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child!,
+          ),
+        );
+      },
       home: const _Gate(),
     );
   }
@@ -59,21 +80,18 @@ class _GateState extends State<_Gate> {
       future: _boot,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const CupertinoPageScaffold(child: Center(child: CupertinoActivityIndicator()));
         }
         if (snap.hasError) {
-          return Scaffold(
-            body: Center(
+          return CupertinoPageScaffold(
+            child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('연결하지 못했어요.\n인터넷을 확인하고 다시 해 주세요.', textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    FilledButton(onPressed: _retry, child: const Text('다시 시도')),
-                  ],
-                ),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('연결하지 못했어요.\n인터넷을 확인하고 다시 해 주세요.', textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  CupertinoButton.filled(onPressed: _retry, child: const Text('다시 시도')),
+                ]),
               ),
             ),
           );
@@ -82,7 +100,7 @@ class _GateState extends State<_Gate> {
         if (nick == null || nick.trim().isEmpty) {
           return NicknameScreen(onDone: _retry);
         }
-        return const HomeScreen();
+        return const RootPage();
       },
     );
   }

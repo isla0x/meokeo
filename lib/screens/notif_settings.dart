@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../notifications.dart';
 import '../posts.dart';
-import '../theme.dart';
+import '../ui.dart';
 
 class NotifSettingsScreen extends StatefulWidget {
   const NotifSettingsScreen({super.key});
@@ -34,10 +34,7 @@ class _NotifSettingsScreenState extends State<NotifSettingsScreen> {
     if (on) {
       final ok = await Notifier.instance.requestPermission();
       if (!ok) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('알림 권한이 꺼져 있어요. 설정 → 뭐먹어? → 알림에서 켜 주세요.')));
-        }
+        if (mounted) showMessage(context, '알림 권한이 꺼져 있어요. 설정 → 뭐먹어? → 알림에서 켜 주세요.');
         return;
       }
     }
@@ -45,58 +42,74 @@ class _NotifSettingsScreenState extends State<NotifSettingsScreen> {
     await Notifier.instance.save(a);
   }
 
-  Future<void> _pick(Meal m) async {
+  void _pick(Meal m) {
     final a = _alarms!;
-    final t = await showTimePicker(
+    var picked = DateTime(2000, 1, 1, a[m]!.hour, a[m]!.minute);
+    showCupertinoModalPopup<void>(
       context: context,
-      initialTime: TimeOfDay(hour: a[m]!.hour, minute: a[m]!.minute),
-      helpText: '${m.label} 알림 시간',
-      cancelText: '취소',
-      confirmText: '확인',
+      builder: (ctx) => Container(
+        height: 280,
+        color: CupertinoColors.systemBackground.resolveFrom(ctx),
+        child: Column(children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            NavTextButton('취소', () => Navigator.pop(ctx)),
+            Text('${m.label} 알림 시간', style: font(15, FontWeight.w600)),
+            NavTextButton('확인', () async {
+              Navigator.pop(ctx);
+              setState(() {
+                a[m]!.hour = picked.hour;
+                a[m]!.minute = picked.minute;
+              });
+              await Notifier.instance.save(a);
+            }, bold: true),
+          ]),
+          Expanded(
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              initialDateTime: picked,
+              minuteInterval: 5,
+              onDateTimeChanged: (d) => picked = d,
+            ),
+          ),
+        ]),
+      ),
     );
-    if (t == null) return;
-    setState(() {
-      a[m]!.hour = t.hour;
-      a[m]!.minute = t.minute;
-    });
-    await Notifier.instance.save(a);
   }
 
   @override
   Widget build(BuildContext context) {
     final a = _alarms;
-    return Scaffold(
-      appBar: AppBar(title: const Text('알림 시간')),
-      body: a == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(4, 4, 4, 12),
-                  child: Text('정해진 시간에 "뭐 먹었어?" 알림이 와요.\n알림은 이 폰에서만 예약되고, 서버로 보내지 않아요.',
-                      style: TextStyle(color: kMuted)),
-                ),
-                for (final m in Meal.values)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                        color: Colors.white, borderRadius: BorderRadius.circular(16)),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      leading: Text(m.emoji, style: const TextStyle(fontSize: 24)),
-                      title: Text(m.label, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      subtitle: Text(_fmt(a[m]!)),
-                      onTap: () => _pick(m),
-                      trailing: Switch(
-                        value: a[m]!.enabled,
-                        activeColor: kTeal,
-                        onChanged: (v) => _toggle(m, v),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: CustomScrollView(slivers: [
+        CupertinoSliverNavigationBar(
+          largeTitle: const Text('알림 시간'),
+          backgroundColor: CupertinoColors.systemGroupedBackground,
+        ),
+        SliverToBoxAdapter(
+          child: a == null
+              ? const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: CupertinoActivityIndicator()))
+              : Section(
+                  footer: '정해진 시간에 "뭐 먹었어?" 알림이 와요. 알림은 이 폰에서만 예약되고, 서버로 보내지 않아요.',
+                  children: [
+                    for (final m in Meal.values)
+                      Row1(
+                        minHeight: 56,
+                        leading: Icon(m.icon, size: 20, color: m.color),
+                        title: m.label,
+                        subtitle: _fmt(a[m]!),
+                        onTap: () => _pick(m),
+                        trailing: CupertinoSwitch(
+                          value: a[m]!.enabled,
+                          activeTrackColor: kAccent,
+                          onChanged: (v) => _toggle(m, v),
+                        ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
+                  ],
+                ),
+        ),
+        SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ]),
     );
   }
 }

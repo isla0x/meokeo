@@ -1,164 +1,297 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../data.dart';
+import '../model.dart';
 import '../posts.dart';
-import '../theme.dart';
+import '../ui.dart';
+import 'parts.dart';
+import 'post_sheet.dart';
 
-class CalendarView extends StatefulWidget {
-  const CalendarView({super.key, required this.room});
-  final Room room;
-
-  @override
-  State<CalendarView> createState() => _CalendarViewState();
-}
-
-class _CalendarViewState extends State<CalendarView> {
-  late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
-  late DateTime _selected = DateTime.now();
-
-  void _move(int d) => setState(() {
-        _month = DateTime(_month.year, _month.month + d);
-        _selected = DateTime(_month.year, _month.month, 1);
-      });
+class CalendarPage extends StatelessWidget {
+  const CalendarPage({super.key, required this.model});
+  final RoomsModel model;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Post>>(
-        stream: PostRepo.instance.postsInMonth(widget.room.id, _month),
-        builder: (context, snap) {
-          if (snap.hasError) {
-            return Center(child: Text('불러오지 못했어요.\n(${errorDetail(snap.error!)})', textAlign: TextAlign.center));
-          }
-          final posts = snap.data ?? const <Post>[];
-          final byDay = <String, List<Post>>{};
-          for (final p in posts) {
-            byDay.putIfAbsent(p.date, () => []).add(p);
-          }
-          final selPosts = (byDay[dayKey(_selected)] ?? [])
-            ..sort((a, b) => a.meal.index.compareTo(b.meal.index));
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(onPressed: () => _move(-1), icon: const Icon(Icons.chevron_left_rounded)),
-                  Text('${_month.year}년 ${_month.month}월',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                  IconButton(onPressed: () => _move(1), icon: const Icon(Icons.chevron_right_rounded)),
-                ],
-              ),
-              Row(
-                children: [
-                  for (final w in const ['일', '월', '화', '수', '목', '금', '토'])
-                    Expanded(
-                      child: Center(
-                          child: Text(w, style: const TextStyle(color: kMuted, fontSize: 12))),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              _grid(byDay),
-              const SizedBox(height: 18),
-              Text('${_selected.month}월 ${_selected.day}일',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              if (selPosts.isEmpty)
-                const Text('이 날은 올린 사진이 없어요', style: TextStyle(color: kMuted))
-              else
-                FutureBuilder<Map<String, String>>(
-                  future: Repo.instance.nicknames(widget.room.members),
-                  builder: (context, ns) {
-                    final names = ns.data ?? const <String, String>{};
-                    return Column(
-                      children: [
-                        for (final p in selPosts)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                color: Colors.white, borderRadius: BorderRadius.circular(kRadius)),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.memory(p.photo, width: 84, height: 84, fit: BoxFit.cover),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('${p.meal.emoji} ${p.meal.label} · ${p.uid == Repo.instance.uid ? '나' : (names[p.uid] ?? '…')}',
-                                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                                      if (p.text.isNotEmpty) Text(p.text),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-            ],
-          );
-        },
-    );
-  }
-
-  Widget _grid(Map<String, List<Post>> byDay) {
-    final first = DateTime(_month.year, _month.month, 1);
-    final days = DateTime(_month.year, _month.month + 1, 0).day;
-    final lead = first.weekday % 7; // 일요일 시작
-    final cells = <Widget>[
-      for (var i = 0; i < lead; i++) const SizedBox.shrink(),
-      for (var d = 1; d <= days; d++) _cell(DateTime(_month.year, _month.month, d), byDay),
-    ];
-    return GridView.count(
-      crossAxisCount: 7,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.85,
-      children: cells,
-    );
-  }
-
-  Widget _cell(DateTime d, Map<String, List<Post>> byDay) {
-    final posts = byDay[dayKey(d)] ?? const <Post>[];
-    final sel = dayKey(d) == dayKey(_selected);
-    final today = dayKey(d) == dayKey(DateTime.now());
-    return GestureDetector(
-      onTap: () => setState(() => _selected = d),
-      child: Container(
-        margin: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: sel ? kTealSoft : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: today ? kTeal : Colors.transparent, width: 1.5),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('${d.day}', style: TextStyle(fontSize: 13, fontWeight: sel ? FontWeight.w800 : FontWeight.w500)),
-            const SizedBox(height: 3),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (final m in Meal.values)
-                  Container(
-                    width: 5,
-                    height: 5,
-                    margin: const EdgeInsets.symmetric(horizontal: 1),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: posts.any((p) => p.meal == m) ? kTeal : const Color(0xFFE6E6EA),
-                    ),
-                  ),
-              ],
+    return ListenableBuilder(
+      listenable: model,
+      builder: (context, _) {
+        final room = model.current;
+        return CupertinoPageScaffold(
+          backgroundColor: CupertinoColors.systemGroupedBackground,
+          child: CustomScrollView(slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('캘린더'),
+              trailing: NavActions(model: model),
+              backgroundColor: CupertinoColors.systemGroupedBackground,
             ),
-          ],
+            SliverToBoxAdapter(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                RoomSwitcher(model: model),
+                if (!model.loaded)
+                  const Padding(padding: EdgeInsets.only(top: 80), child: Center(child: CupertinoActivityIndicator()))
+                else if (room == null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 32),
+                    child: Center(
+                      child: Text('방에 들어가면 지난 끼니를 달력에서 볼 수 있어요',
+                          textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: secondaryOf(context))),
+                    ),
+                  )
+                else
+                  _RoomCalendar(key: ValueKey(room.id), room: room),
+                const SizedBox(height: 24),
+              ]),
+            ),
+          ]),
+        );
+      },
+    );
+  }
+}
+
+enum _DayStatus { none, partial, all }
+
+class _RoomCalendar extends StatefulWidget {
+  const _RoomCalendar({super.key, required this.room});
+  final Room room;
+
+  @override
+  State<_RoomCalendar> createState() => _RoomCalendarState();
+}
+
+class _RoomCalendarState extends State<_RoomCalendar> {
+  late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+  late DateTime _selected = DateTime.now();
+  late Stream<List<Post>> _stream = PostRepo.instance.postsInMonth(widget.room.id, _month);
+  late Future<Map<String, String>> _names = Repo.instance.nicknames(widget.room.members);
+
+  void _moveMonth(int d) {
+    setState(() {
+      _month = DateTime(_month.year, _month.month + d);
+      final now = DateTime.now();
+      _selected = (_month.year == now.year && _month.month == now.month) ? now : DateTime(_month.year, _month.month, 1);
+      _stream = PostRepo.instance.postsInMonth(widget.room.id, _month);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary = secondaryOf(context);
+    final label = labelOf(context);
+    final today = dayKey(DateTime.now());
+    final first = DateTime(_month.year, _month.month);
+    final lead = first.weekday % 7;
+    final daysInMonth = DateTime(_month.year, _month.month + 1, 0).day;
+    final weeks = ((lead + daysInMonth) / 7).ceil();
+
+    return StreamBuilder<List<Post>>(
+      stream: _stream,
+      builder: (context, snap) {
+        if (snap.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(child: Text('불러오지 못했어요.\n(${errorDetail(snap.error!)})', textAlign: TextAlign.center)),
+          );
+        }
+        final posts = snap.data ?? const <Post>[];
+        final byDay = <String, List<Post>>{};
+        for (final p in posts) {
+          byDay.putIfAbsent(p.date, () => []).add(p);
+        }
+        _DayStatus statusOf(DateTime d) {
+          final list = byDay[dayKey(d)];
+          if (list == null || list.isEmpty) return _DayStatus.none;
+          return list.map((p) => p.meal).toSet().length == Meal.values.length ? _DayStatus.all : _DayStatus.partial;
+        }
+
+        final selectedKey = dayKey(_selected);
+        final dayPosts = byDay[selectedKey] ?? const <Post>[];
+        final header = '${_selected.month}월 ${_selected.day}일 ${kWeekdays[_selected.weekday - 1]}요일';
+
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 8, 4),
+            child: Row(children: [
+              Expanded(
+                child: Text('${_month.year}년 ${_month.month}월',
+                    style: font(17, FontWeight.w600, letterSpacing: -0.3).copyWith(color: label)),
+              ),
+              _MonthArrow(icon: CupertinoIcons.chevron_left, onTap: () => _moveMonth(-1)),
+              _MonthArrow(icon: CupertinoIcons.chevron_right, onTap: () => _moveMonth(1)),
+            ]),
+          ),
+          GestureDetector(
+            onHorizontalDragEnd: (d) {
+              final v = d.primaryVelocity ?? 0;
+              if (v < -300) {
+                _moveMonth(1);
+              } else if (v > 300) {
+                _moveMonth(-1);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+              decoration: cardDecoration(context),
+              child: Column(children: [
+                SizedBox(
+                  height: 22,
+                  child: Row(children: [
+                    for (var i = 0; i < 7; i++)
+                      Expanded(
+                        child: Center(
+                          child: Text(const ['일', '월', '화', '수', '목', '금', '토'][i],
+                              style: font(11, FontWeight.w600).copyWith(
+                                  color: i == 0 ? CupertinoDynamicColor.resolve(kHolidayRed, context) : secondary)),
+                        ),
+                      ),
+                  ]),
+                ),
+                for (var w = 0; w < weeks; w++)
+                  Row(children: [
+                    for (var c = 0; c < 7; c++)
+                      Builder(builder: (context) {
+                        final date = DateTime(_month.year, _month.month, 1 - lead + w * 7 + c);
+                        final inMonth = date.month == _month.month;
+                        final key = dayKey(date);
+                        return _DayCell(
+                          date: date,
+                          inMonth: inMonth,
+                          isToday: key == today,
+                          isSelected: key == selectedKey,
+                          status: inMonth ? statusOf(date) : _DayStatus.none,
+                          onTap: () => setState(() => _selected = date),
+                        );
+                      }),
+                  ]),
+              ]),
+            ),
+          ),
+          if (dayPosts.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 7),
+                  child: Text(header, style: TextStyle(fontSize: 12, height: 16 / 12, color: secondary)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: Text('이 날은 올린 사진이 없어요', style: TextStyle(fontSize: 12, color: secondary))),
+                ),
+              ]),
+            )
+          else
+            FutureBuilder<Map<String, String>>(
+              future: _names,
+              builder: (context, ns) {
+                final members = buildMembers(widget.room, ns.data ?? const {});
+                return Column(children: [
+                  for (final meal in Meal.values)
+                    if (dayPosts.any((p) => p.meal == meal))
+                      Section(
+                        header: Row(children: [
+                          Icon(meal.icon, size: 13, color: meal.color),
+                          const SizedBox(width: 5),
+                          Text('$header · ${meal.label}', style: font(12, FontWeight.w600).copyWith(color: secondary)),
+                        ]),
+                        indent: 82,
+                        children: [
+                          for (final p in dayPosts.where((p) => p.meal == meal))
+                            PostRow(
+                              room: widget.room,
+                              member: members.firstWhere((m) => m.uid == p.uid,
+                                  orElse: () => Member(p.uid, '…', 0, p.uid == Repo.instance.uid)),
+                              post: p,
+                              onPost: () => showPostSheet(context, room: widget.room, meal: meal, day: _selected),
+                            ),
+                        ],
+                      ),
+                ]);
+              },
+            ),
+        ]);
+      },
+    );
+  }
+}
+
+class _MonthArrow extends StatelessWidget {
+  const _MonthArrow({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: SizedBox(width: 44, height: 44, child: Icon(icon, size: 20, color: kAccent)),
+    );
+  }
+}
+
+class _DayCell extends StatelessWidget {
+  const _DayCell({
+    required this.date,
+    required this.inMonth,
+    required this.isToday,
+    required this.isSelected,
+    required this.status,
+    required this.onTap,
+  });
+  final DateTime date;
+  final bool inMonth;
+  final bool isToday;
+  final bool isSelected;
+  final _DayStatus status;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    var numberColor = !inMonth
+        ? secondaryOf(context)
+        : date.weekday == DateTime.sunday
+            ? CupertinoDynamicColor.resolve(kHolidayRed, context)
+            : labelOf(context);
+    var weight = FontWeight.w400;
+    Color? circle;
+    if (isToday) {
+      circle = kAccent;
+      numberColor = CupertinoColors.white;
+      weight = FontWeight.w600;
+    } else if (isSelected) {
+      circle = CupertinoDynamicColor.resolve(kAccentSoft, context);
+      numberColor = CupertinoDynamicColor.resolve(kAccentDeep, context);
+      weight = FontWeight.w600;
+    }
+    final dot = switch (status) {
+      _DayStatus.none => const SizedBox(width: 6, height: 6),
+      _DayStatus.all => Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: kAccent)),
+      _DayStatus.partial => Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: kAccent, width: 1.4)),
+        ),
+    };
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox(
+          height: 46,
+          child: Column(children: [
+            Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: circle),
+              child: Text('${date.day}', style: font(15, weight).copyWith(color: numberColor)),
+            ),
+            const SizedBox(height: 2),
+            dot,
+          ]),
         ),
       ),
     );
