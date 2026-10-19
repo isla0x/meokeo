@@ -65,9 +65,9 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   Widget build(BuildContext context) {
     final ready = _code.text.length == kCodeLength;
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: kBand,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
+        backgroundColor: kBand,
         automaticallyImplyLeading: false,
         leading: NavTextButton('취소', () => Navigator.of(context).pop()),
         middle: const Text('코드로 참여하기'),

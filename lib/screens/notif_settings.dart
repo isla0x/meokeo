@@ -80,11 +80,11 @@ class _NotifSettingsScreenState extends State<NotifSettingsScreen> {
   Widget build(BuildContext context) {
     final a = _alarms;
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: kBand,
       child: CustomScrollView(slivers: [
         CupertinoSliverNavigationBar(
           largeTitle: const Text('알림 시간'),
-          backgroundColor: CupertinoColors.systemGroupedBackground,
+          backgroundColor: kBand,
         ),
         SliverToBoxAdapter(
           child: a == null

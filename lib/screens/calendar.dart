@@ -18,12 +18,12 @@ class CalendarPage extends StatelessWidget {
       builder: (context, _) {
         final room = model.current;
         return CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.systemGroupedBackground,
+          backgroundColor: CupertinoColors.white,
           child: CustomScrollView(slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: const Text('캘린더'),
               trailing: NavActions(model: model),
-              backgroundColor: CupertinoColors.systemGroupedBackground,
+              backgroundColor: CupertinoColors.white,
             ),
             SliverToBoxAdapter(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -49,8 +49,6 @@ class CalendarPage extends StatelessWidget {
     );
   }
 }
-
-enum _DayStatus { none, partial, all }
 
 class _RoomCalendar extends StatefulWidget {
   const _RoomCalendar({super.key, required this.room});
@@ -99,11 +97,7 @@ class _RoomCalendarState extends State<_RoomCalendar> {
         for (final p in posts) {
           byDay.putIfAbsent(p.date, () => []).add(p);
         }
-        _DayStatus statusOf(DateTime d) {
-          final list = byDay[dayKey(d)];
-          if (list == null || list.isEmpty) return _DayStatus.none;
-          return list.map((p) => p.meal).toSet().length == Meal.values.length ? _DayStatus.all : _DayStatus.partial;
-        }
+        Set<Meal> mealsOf(DateTime d) => {for (final p in byDay[dayKey(d)] ?? const <Post>[]) p.meal};
 
         final selectedKey = dayKey(_selected);
         final dayPosts = byDay[selectedKey] ?? const <Post>[];
@@ -115,7 +109,7 @@ class _RoomCalendarState extends State<_RoomCalendar> {
             child: Row(children: [
               Expanded(
                 child: Text('${_month.year}년 ${_month.month}월',
-                    style: font(17, FontWeight.w600, letterSpacing: -0.3).copyWith(color: label)),
+                    style: font(18, FontWeight.w700, letterSpacing: -0.3).copyWith(color: label)),
               ),
               _MonthArrow(icon: CupertinoIcons.chevron_left, onTap: () => _moveMonth(-1)),
               _MonthArrow(icon: CupertinoIcons.chevron_right, onTap: () => _moveMonth(1)),
@@ -131,9 +125,8 @@ class _RoomCalendarState extends State<_RoomCalendar> {
               }
             },
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
-              decoration: cardDecoration(context),
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.fromLTRB(0, 6, 0, 12),
               child: Column(children: [
                 SizedBox(
                   height: 22,
@@ -160,7 +153,7 @@ class _RoomCalendarState extends State<_RoomCalendar> {
                           inMonth: inMonth,
                           isToday: key == today,
                           isSelected: key == selectedKey,
-                          status: inMonth ? statusOf(date) : _DayStatus.none,
+                          meals: inMonth ? mealsOf(date) : const <Meal>{},
                           onTap: () => setState(() => _selected = date),
                         );
                       }),
@@ -169,18 +162,14 @@ class _RoomCalendarState extends State<_RoomCalendar> {
             ),
           ),
           if (dayPosts.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Section(
+              headerText: header,
+              children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 7),
-                  child: Text(header, style: TextStyle(fontSize: 12, height: 16 / 12, color: secondary)),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  child: Center(child: Text('이 날은 올린 사진이 없어요', style: font(13, FontWeight.w400).copyWith(color: secondary))),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: Text('이 날은 올린 사진이 없어요', style: TextStyle(fontSize: 12, color: secondary))),
-                ),
-              ]),
+              ],
             )
           else
             FutureBuilder<Map<String, String>>(
@@ -192,20 +181,22 @@ class _RoomCalendarState extends State<_RoomCalendar> {
                     if (dayPosts.any((p) => p.meal == meal))
                       Section(
                         header: Row(children: [
-                          Icon(meal.icon, size: 13, color: meal.color),
-                          const SizedBox(width: 5),
-                          Text('$header · ${meal.label}', style: font(12, FontWeight.w600).copyWith(color: secondary)),
+                          Text('$header · ${meal.label}', style: font(15, FontWeight.w700)),
                         ]),
-                        indent: 82,
                         children: [
-                          for (final p in dayPosts.where((p) => p.meal == meal))
-                            PostRow(
-                              room: widget.room,
-                              member: members.firstWhere((m) => m.uid == p.uid,
-                                  orElse: () => Member(p.uid, '…', 0, p.uid == Repo.instance.uid)),
-                              post: p,
-                              onPost: () => showPostSheet(context, room: widget.room, meal: meal, day: _selected),
-                            ),
+                          MealTiles(
+                            room: widget.room,
+                            meal: meal,
+                            onPost: () => showPostSheet(context, room: widget.room, meal: meal, day: _selected),
+                            entries: [
+                              for (final p in dayPosts.where((p) => p.meal == meal))
+                                TileEntry(
+                                  members.firstWhere((m) => m.uid == p.uid,
+                                      orElse: () => Member(p.uid, '…', 0, p.uid == Repo.instance.uid)),
+                                  p,
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                 ]);
@@ -238,59 +229,61 @@ class _DayCell extends StatelessWidget {
     required this.inMonth,
     required this.isToday,
     required this.isSelected,
-    required this.status,
+    required this.meals,
     required this.onTap,
   });
   final DateTime date;
   final bool inMonth;
   final bool isToday;
   final bool isSelected;
-  final _DayStatus status;
+  final Set<Meal> meals;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     var numberColor = !inMonth
-        ? secondaryOf(context)
+        ? const Color(0xFFC8CADB)
         : date.weekday == DateTime.sunday
             ? CupertinoDynamicColor.resolve(kHolidayRed, context)
-            : labelOf(context);
-    var weight = FontWeight.w400;
-    Color? circle;
+            : kInk;
+    var weight = FontWeight.w500;
+    Color? bg;
     if (isToday) {
-      circle = kAccent;
+      bg = kAccent;
       numberColor = CupertinoColors.white;
-      weight = FontWeight.w600;
+      weight = FontWeight.w700;
     } else if (isSelected) {
-      circle = CupertinoDynamicColor.resolve(kAccentSoft, context);
-      numberColor = CupertinoDynamicColor.resolve(kAccentDeep, context);
-      weight = FontWeight.w600;
+      bg = kAccentSoft.resolveFrom(context);
+      numberColor = kIndigo;
+      weight = FontWeight.w700;
     }
-    final dot = switch (status) {
-      _DayStatus.none => const SizedBox(width: 6, height: 6),
-      _DayStatus.all => Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: kAccent)),
-      _DayStatus.partial => Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: kAccent, width: 1.4)),
-        ),
-    };
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: SizedBox(
-          height: 46,
+          height: 52,
           child: Column(children: [
             Container(
               width: 30,
               height: 30,
               alignment: Alignment.center,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: circle),
-              child: Text('${date.day}', style: font(15, weight).copyWith(color: numberColor)),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(9), color: bg),
+              child: Text('${date.day}', style: font(14, weight).copyWith(color: numberColor)),
             ),
-            const SizedBox(height: 2),
-            dot,
+            const SizedBox(height: 4),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              for (final m in Meal.values)
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    color: !inMonth ? null : (meals.contains(m) ? kMint : const Color(0xFFE3E5EF)),
+                  ),
+                ),
+            ]),
           ]),
         ),
       ),

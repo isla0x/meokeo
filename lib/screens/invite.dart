@@ -17,11 +17,11 @@ class InviteScreen extends StatelessWidget {
       builder: (context, snap) {
         final room = snap.data;
         return CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.systemGroupedBackground,
+          backgroundColor: kBand,
           child: CustomScrollView(slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: const Text('친구 초대하기'),
-              backgroundColor: CupertinoColors.systemGroupedBackground,
+              backgroundColor: kBand,
               trailing: justCreated
                   ? NavTextButton('완료', () => Navigator.of(context).popUntil((r) => r.isFirst), bold: true)
                   : null,

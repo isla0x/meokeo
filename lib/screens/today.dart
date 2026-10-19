@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../data.dart';
+import '../icons.dart';
 import '../model.dart';
 import '../posts.dart';
 import '../ui.dart';
@@ -22,19 +23,19 @@ class TodayPage extends StatelessWidget {
       builder: (context, _) {
         final room = model.current;
         return CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.systemGroupedBackground,
-          child: CustomScrollView(slivers: [
+          backgroundColor: CupertinoColors.white,
+          child: Stack(children: [CustomScrollView(slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: const Text('오늘'),
               trailing: NavActions(model: model),
-              backgroundColor: CupertinoColors.systemGroupedBackground,
+              backgroundColor: CupertinoColors.white,
             ),
             SliverToBoxAdapter(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 2, 20, 12),
-                  child: Text('${now.month}월 ${now.day}일 ${kWeekdays[now.weekday - 1]}요일',
-                      style: TextStyle(fontSize: 12, color: secondary)),
+                  child: Text('${now.month}월 ${now.day}일 ${kWeekdays[now.weekday - 1]}요일${room == null ? '' : ' · ${room.members.length}명 참여 중'}',
+                      style: TextStyle(fontSize: 13, color: secondary)),
                 ),
                 RoomSwitcher(model: model),
                 if (!model.loaded)
@@ -50,6 +51,23 @@ class TodayPage extends StatelessWidget {
                   _RoomToday(key: ValueKey(room.id), room: room),
                 const SizedBox(height: 24),
               ]),
+            ),
+          ]),
+          if (room != null)
+            Positioned(
+              right: 20,
+              bottom: MediaQuery.paddingOf(context).bottom + 16,
+              child: GestureDetector(
+                onTap: () => showPostSheet(context, room: room, meal: Meal.forCamera(now), day: now),
+                child: Container(
+                  width: 54,
+                  height: 54,
+                  decoration: const BoxDecoration(color: kAccent, shape: BoxShape.circle, boxShadow: [
+                    BoxShadow(color: Color(0x442B2D55), blurRadius: 18, offset: Offset(0, 8)),
+                  ]),
+                  child: const Center(child: GlyphIcon(Glyph.camera, color: CupertinoColors.white, size: 26)),
+                ),
+              ),
             ),
           ]),
         );
@@ -161,9 +179,17 @@ class _MealSection extends StatelessWidget {
       return Section(
         header: mealHeader(context, meal, locked: true),
         children: [
-          Row1(
-            leading: Icon(CupertinoIcons.lock_fill, size: 18, color: secondaryOf(context)),
-            title: '${meal.startLabel}에 열려요',
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: kBand, borderRadius: BorderRadius.circular(8)),
+              child: Row(children: [
+                const Icon(CupertinoIcons.lock_fill, size: 14, color: kSubtle),
+                const SizedBox(width: 8),
+                Text('${meal.startLabel}부터 올릴 수 있어요', style: font(13, FontWeight.w400).copyWith(color: kSubtle)),
+              ]),
+            ),
           ),
         ],
       );
@@ -171,30 +197,17 @@ class _MealSection extends StatelessWidget {
 
     final byUid = {for (final p in posts) p.uid: p};
     final posted = members.where((m) => byUid.containsKey(m.uid)).length;
-    final iPosted = byUid.containsKey(Repo.instance.uid);
-    final remaining = members.length - posted;
-    var footer = '$posted명이 올렸어요';
-    if (remaining == 0) {
-      footer += ' · 모두 올렸어요';
-    } else if (remaining == 1 && !iPosted) {
-      footer += ' · 나만 남았어요';
-    } else {
-      footer += ' · $remaining명 남았어요';
-    }
-    if (phase == MealPhase.now) footer += '\n앨범에는 저장되지 않아요';
-
+    void post() => showPostSheet(context, room: room, meal: meal, day: now);
     return Section(
-      header: mealHeader(context, meal, current: phase == MealPhase.now),
-      indent: 82,
-      footer: footer,
+      header: mealHeader(context, meal, current: phase == MealPhase.now, posted: posted, total: members.length),
+      footer: phase == MealPhase.now ? '앨범에는 저장되지 않아요' : null,
       children: [
-        for (final m in members)
-          PostRow(
-            room: room,
-            member: m,
-            post: byUid[m.uid],
-            onPost: () => showPostSheet(context, room: room, meal: meal, day: now),
-          ),
+        MealTiles(
+          room: room,
+          meal: meal,
+          onPost: post,
+          entries: [for (final m in members) TileEntry(m, byUid[m.uid])],
+        ),
       ],
     );
   }

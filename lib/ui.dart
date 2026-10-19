@@ -3,14 +3,20 @@ import 'package:flutter/material.dart' show Icons;
 import 'package:google_fonts/google_fonts.dart';
 
 // ───────── 하루링과 같은 디자인 값 ─────────
-const Color kAccent = Color(0xFF55A0FA);
+const Color kAccent = Color(0xFF2B2D55); // 짙은 남색 (기본 색)
+const Color kIndigo = Color(0xFF5B63F0); // 보라빛 파랑 (포인트)
+const Color kMint = Color(0xFF5ED3B1); // 완료 표시
+const Color kBand = Color(0xFFF3F4F8); // 구역 사이 연회색 띠
+const Color kInk = Color(0xFF23244A); // 글자색
+const Color kSubtle = Color(0xFF8A8CA3); // 보조 글자색
+const Color kLine = Color(0xFFECEDF3);
 const CupertinoDynamicColor kAccentSoft = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFE3EEFD),
-  darkColor: Color(0xFF1B2B45),
+  color: Color(0xFFEEF0FF),
+  darkColor: Color(0xFFEEF0FF),
 );
 const CupertinoDynamicColor kAccentDeep = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF1F63C4),
-  darkColor: Color(0xFF8CBBFA),
+  color: Color(0xFF5B63F0),
+  darkColor: Color(0xFF5B63F0),
 );
 const CupertinoDynamicColor kHolidayRed = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFD70015),
@@ -30,7 +36,7 @@ const List<String> kWeekdays = ['월', '화', '수', '목', '금', '토', '일']
 
 // 끼니 아이콘 색
 const Color kSunrise = Color(0xFFE9A93A);
-const Color kSun = Color(0xFF55A0FA);
+const Color kSun = Color(0xFFF08A3C);
 const Color kMoon = Color(0xFF5C5BA6);
 
 /// 영문·숫자는 Plus Jakarta Sans, 한글은 Pretendard
@@ -39,12 +45,12 @@ TextStyle font(double size, FontWeight weight, {double letterSpacing = 0}) {
     fontSize: size,
     fontWeight: weight,
     letterSpacing: letterSpacing,
-    color: CupertinoColors.label,
+    color: kInk,
   ).copyWith(fontFamilyFallback: const ['Pretendard']);
 }
 
-Color secondaryOf(BuildContext c) => CupertinoColors.secondaryLabel.resolveFrom(c);
-Color labelOf(BuildContext c) => CupertinoColors.label.resolveFrom(c);
+Color secondaryOf(BuildContext c) => kSubtle;
+Color labelOf(BuildContext c) => kInk;
 
 BoxDecoration cardDecoration(BuildContext context) => BoxDecoration(
       color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
@@ -66,9 +72,9 @@ Future<void> showMessage(BuildContext context, String message, {String? title}) 
   );
 }
 
-// ───────── 카드 목록 (하루링의 _Section) ─────────
+// ───────── 구역 (흰 바탕 + 위쪽 연회색 띠) ─────────
 class Section extends StatelessWidget {
-  const Section({super.key, this.header, this.headerText, required this.children, this.footer, this.indent = 16});
+  const Section({super.key, this.header, this.headerText, required this.children, this.footer, this.indent = 20});
   final Widget? header;
   final String? headerText;
   final List<Widget> children;
@@ -77,39 +83,33 @@ class Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = secondaryOf(context);
-    final line = CupertinoColors.separator.resolveFrom(context);
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       if (i > 0) {
-        rows.add(Container(margin: EdgeInsetsDirectional.only(start: indent), height: 0.5, color: line));
+        rows.add(Container(margin: EdgeInsetsDirectional.only(start: indent), height: 0.5, color: kLine));
       }
       rows.add(children[i]);
     }
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (header != null || headerText != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 0, 32, 7),
-            child: header ??
-                Text(headerText!, style: TextStyle(fontSize: 12, height: 16 / 12, color: secondary)),
-          ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: cardDecoration(context),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(kCardRadius),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
-          ),
-        ),
-        if (footer != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 7, 32, 0),
-            child: Text(footer!, style: TextStyle(fontSize: 12, height: 16 / 12, color: secondary)),
-          ),
-      ]),
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Container(height: 8, color: kBand),
+      Container(
+        color: CupertinoColors.white,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (header != null || headerText != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: header ?? Text(headerText!, style: font(15, FontWeight.w700)),
+            ),
+          ...rows,
+          if (footer != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Text(footer!, style: font(12, FontWeight.w400).copyWith(color: kSubtle, height: 1.4)),
+            ),
+        ]),
+      ),
+    ]);
   }
 }
 

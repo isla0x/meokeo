@@ -24,7 +24,9 @@ class MeokeoApp extends StatelessWidget {
       title: '뭐먹어?',
       debugShowCheckedModeBanner: false,
       theme: CupertinoThemeData(
+        brightness: Brightness.light,
         primaryColor: kAccent,
+        scaffoldBackgroundColor: CupertinoColors.white,
         textTheme: CupertinoTextThemeData(
           textStyle: font(15, FontWeight.w500, letterSpacing: -0.2),
           navLargeTitleTextStyle: font(28, FontWeight.w700, letterSpacing: -0.4),
@@ -32,7 +34,7 @@ class MeokeoApp extends StatelessWidget {
           tabLabelTextStyle: font(10, FontWeight.w500, letterSpacing: -0.1),
         ),
       ),
-      // 아이폰 설정의 글자 크기는 그대로 반영하면서 앱 전체 글자를 조금 키워요. (하루링과 같아요)
+      // 아이폰 설정의 글자 크기는 그대로 반영하면서 앱 전체 글자를 조금 키워요. 
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         final scale = (mq.textScaler.scale(1.0) * kTextBoost).clamp(1.0, 1.6).toDouble();

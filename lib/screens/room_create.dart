@@ -54,9 +54,9 @@ class _RoomCreateScreenState extends State<RoomCreateScreen> {
   Widget build(BuildContext context) {
     final secondary = secondaryOf(context);
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: kBand,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
+        backgroundColor: kBand,
         automaticallyImplyLeading: false,
         leading: NavTextButton('취소', () => Navigator.of(context).pop()),
         middle: const Text('새 방 만들기'),

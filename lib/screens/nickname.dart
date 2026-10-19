@@ -45,7 +45,7 @@ class _NicknameScreenState extends State<NicknameScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: kBand,
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(0, 56, 0, 24),

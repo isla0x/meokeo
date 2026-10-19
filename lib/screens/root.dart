@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Icons;
 
+import '../icons.dart';
 import '../model.dart';
 import 'calendar.dart';
 import 'today.dart';
@@ -26,17 +26,15 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
-        backgroundColor: const CupertinoDynamicColor.withBrightness(
-          color: Color(0xFFF9F9F9),
-          darkColor: Color(0xFF1D1D1D),
-        ),
+        backgroundColor: CupertinoColors.white,
+        border: const Border(top: BorderSide(color: kLine, width: 0.5)),
         activeColor: kAccent,
-        inactiveColor: CupertinoColors.secondaryLabel,
+        inactiveColor: kSubtle,
         iconSize: 26,
         height: 56,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_rounded), label: '오늘'),
-          BottomNavigationBarItem(icon: Icon(CupertinoIcons.calendar), label: '캘린더'),
+          BottomNavigationBarItem(icon: GlyphIcon(Glyph.fork), label: '오늘'),
+          BottomNavigationBarItem(icon: GlyphIcon(Glyph.calendar), label: '캘린더'),
         ],
       ),
       tabBuilder: (context, index) {

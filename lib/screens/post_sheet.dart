@@ -64,7 +64,7 @@ class _PostSheetState extends State<_PostSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = CupertinoColors.systemGroupedBackground.resolveFrom(context);
+    final bg = kBand;
     final secondary = secondaryOf(context);
     final grey = CupertinoColors.systemGrey5.resolveFrom(context);
     return DefaultTextStyle(

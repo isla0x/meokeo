@@ -5,22 +5,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart' show Color, CupertinoIcons, IconData;
 
+import 'icons.dart';
 import 'ui.dart';
 
 enum MealPhase { upcoming, now, past }
 
 enum Meal {
-  breakfast('아침', '🌅', 7 * 60, 9 * 60 + 30, CupertinoIcons.sunrise_fill, kSunrise),
-  lunch('점심', '☀️', 11 * 60 + 30, 13 * 60, CupertinoIcons.sun_max_fill, kSun),
-  dinner('저녁', '🌙', 17 * 60, 19 * 60, CupertinoIcons.moon_fill, kMoon);
+  breakfast('아침', '🌅', 7 * 60, 9 * 60 + 30, CupertinoIcons.sunrise_fill, kSunrise, Glyph.sunrise),
+  lunch('점심', '☀️', 11 * 60 + 30, 13 * 60, CupertinoIcons.sun_max_fill, kSun, Glyph.sun),
+  dinner('저녁', '🌙', 17 * 60, 19 * 60, CupertinoIcons.moon_fill, kMoon, Glyph.moon);
 
-  const Meal(this.label, this.emoji, this.fromMin, this.toMin, this.icon, this.color);
+  const Meal(this.label, this.emoji, this.fromMin, this.toMin, this.icon, this.color, this.glyph);
   final String label;
   final String emoji;
   final int fromMin;
   final int toMin;
   final IconData icon;
   final Color color;
+  final Glyph glyph;
 
   static String _c(int m, {bool period = true}) {
     final h = m ~/ 60, mi = m % 60;
