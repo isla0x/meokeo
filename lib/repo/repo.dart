@@ -32,6 +32,9 @@ abstract class Repo {
     String text = '',
   });
   Future<void> deletePost(String roomId, Post post);
+
+  /// 내 사진·이름·방 참여를 모두 지우고 계정도 없애요.
+  Future<void> deleteMyData();
 }
 
 /// 사진 한 장의 최대 크기 (보안 규칙의 800KB보다 조금 작게)

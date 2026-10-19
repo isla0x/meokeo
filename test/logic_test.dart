@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meokeo/holidays.dart';
 import 'package:meokeo/models.dart';
+import 'package:meokeo/repo/demo_repo.dart';
 import 'package:meokeo/screens/join_room.dart';
+import 'package:meokeo/state.dart';
 
 void main() {
   test('끼니 시간 글자', () {
@@ -47,5 +49,19 @@ void main() {
     expect(isRedDay(DateTime(2026, 10, 18)), isTrue); // 일요일
     expect(isRedDay(DateTime(2026, 10, 9)), isTrue); // 한글날
     expect(isRedDay(DateTime(2026, 10, 10)), isFalse); // 토요일
+  });
+
+  test('내 정보 모두 지우기', () async {
+    final r = Room(id: 'r', name: '방', icon: RoomIcon.dining, ownerId: 'me', members: ['me'], code: 'AAAAAAAA');
+    final repo = DemoRepo(myUid: 'me', nickname: '나', rooms: [r]);
+    final app = AppState(repo, useNotifications: false);
+    await app.boot();
+    expect(app.hasNickname, isTrue);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(app.rooms.length, 1);
+    await app.eraseMe();
+    expect(app.booted, isTrue);
+    expect(app.hasNickname, isFalse);
+    expect(app.rooms, isEmpty);
   });
 }

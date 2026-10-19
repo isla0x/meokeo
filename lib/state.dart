@@ -104,6 +104,26 @@ class AppState extends ChangeNotifier {
     _watchPeers();
   }
 
+  /// 내 정보 모두 지우기: 서버의 내 데이터와 계정을 지우고 처음 상태로 돌아가요.
+  Future<void> eraseMe() async {
+    await _roomSub?.cancel();
+    _roomSub = null;
+    for (final s in _peerSubs.values) {
+      s.cancel();
+    }
+    _peerSubs.clear();
+    await repo.deleteMyData();
+    if (useNotifications) await Notifier.instance.wipe();
+    nickname = null;
+    rooms = const [];
+    roomsLoaded = false;
+    _selectedId = null;
+    _nameFutures.clear();
+    _peerSeen.clear();
+    notif = NotifSettings.defaults();
+    await boot();
+  }
+
   void select(String id) {
     _selectedId = id;
     notifyListeners();

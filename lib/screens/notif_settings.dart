@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import '../icons.dart';
 import '../models.dart';
 import '../notifications.dart';
+import '../repo/firebase_repo.dart' show errorDetail;
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -38,6 +39,23 @@ class NotifSettingsPage extends StatelessWidget {
     edit(s);
     if (turnedOn) await Notifier.instance.requestPermission();
     await app.saveNotif(s);
+  }
+
+  Future<void> _erase(BuildContext context) async {
+    final app = AppScope.read(context);
+    final nav = Navigator.of(context, rootNavigator: true);
+    final ok = await showConfirm(context,
+        title: '내 정보를 모두 지울까요?',
+        message: '내가 올린 사진과 이름이 지워지고 모든 방에서 나가요. 되돌릴 수 없어요.',
+        okLabel: '모두 지우기',
+        destructive: true);
+    if (!ok || !context.mounted) return;
+    try {
+      await app.eraseMe();
+      nav.popUntil((r) => r.isFirst);
+    } catch (e) {
+      if (context.mounted) await showAlert(context, '지우지 못했어요.\n인터넷을 확인하고 다시 해 주세요.\n(${errorDetail(e)})');
+    }
   }
 
   Future<void> _pickTime(BuildContext context, Meal m) async {
@@ -253,6 +271,21 @@ class NotifSettingsPage extends StatelessWidget {
                   last: true),
             ]),
           ),
+          const SectionLabel('내 정보', top: 20),
+          CardBox(
+            clip: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _erase(context),
+              child: Container(
+                height: 52,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text('내 정보 모두 지우기', style: ts(15, lh: 20, color: C.red)),
+              ),
+            ),
+          ),
+          const FooterNote('올린 사진과 이름이 모두 지워지고 처음 화면으로 돌아가요.'),
         ]),
       ),
     );

@@ -116,6 +116,18 @@ class Notifier {
     return (sp.getStringList('posted_keys') ?? const <String>[]).toSet();
   }
 
+  /// 내 정보를 지울 때: 예약된 알림과 저장된 설정을 모두 지워요.
+  Future<void> wipe() async {
+    try {
+      await init();
+      await _plugin.cancelAll();
+    } catch (_) {}
+    try {
+      final sp = await SharedPreferences.getInstance();
+      await sp.clear();
+    } catch (_) {}
+  }
+
   /// 앱을 켤 때 저장된 설정대로 다시 예약해요.
   Future<void> restore() async {
     try {

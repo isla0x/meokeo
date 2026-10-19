@@ -97,6 +97,14 @@ class DemoRepo extends Repo {
   }
 
   @override
+  Future<void> deleteMyData() async {
+    _posts.removeWhere((p) => p.uid == myUid);
+    _rooms.clear();
+    nickname = null;
+    _roomsCtl.add(const []);
+  }
+
+  @override
   Future<void> deletePost(String roomId, Post post) async {
     _posts.removeWhere((p) => p.id == post.id);
     _postsCtl.add(null);

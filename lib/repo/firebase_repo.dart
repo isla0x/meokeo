@@ -214,6 +214,8 @@ class FirebaseRepo extends Repo {
       members.remove(uid);
       if (members.isEmpty) {
         tx.delete(ref);
+        final code = snap.data()?['code'] as String?;
+        if (code != null) tx.delete(_db.collection('codes').doc(code)); // 빈 방의 초대 코드도 같이 정리
       } else {
         final owner = (snap.data()?['ownerId'] as String?) == uid ? members.first : null;
         tx.update(ref, {'members': members, if (owner != null) 'ownerId': owner});
@@ -265,6 +267,29 @@ class FirebaseRepo extends Repo {
   @override
   Future<void> deletePost(String roomId, Post post) async {
     await _posts(roomId).doc(post.id).delete();
+  }
+
+  @override
+  Future<void> deleteMyData() async {
+    final me = uid;
+    final mine = await _db.collection('rooms').where('members', arrayContains: me).get();
+    for (final r in mine.docs) {
+      final posts = await _posts(r.id).where('uid', isEqualTo: me).get();
+      for (final d in posts.docs) {
+        await d.reference.delete();
+      }
+      await leaveRoom(_roomFrom(r));
+    }
+    try {
+      await _db.collection('users').doc(me).delete();
+    } catch (_) {}
+    _nickCache.clear();
+    try {
+      await _auth.currentUser?.delete();
+    } catch (_) {
+      // 계정 삭제가 안 되면 로그아웃만 해요. 데이터는 이미 다 지워졌어요.
+      await _auth.signOut();
+    }
   }
 }
 
