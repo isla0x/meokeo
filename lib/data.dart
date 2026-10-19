@@ -201,3 +201,9 @@ class Repo {
     });
   }
 }
+
+/// 화면에 보여 줄 오류 설명 (원인 파악용 코드 포함)
+String errorDetail(Object e) {
+  if (e is FirebaseException) return '${e.plugin}/${e.code}';
+  return e.toString().split('\n').first;
+}

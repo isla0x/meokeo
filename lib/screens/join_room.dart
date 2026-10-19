@@ -38,8 +38,8 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
           .pushReplacement(MaterialPageRoute(builder: (_) => InviteScreen(roomId: room.id)));
     } on AppException catch (e) {
       _fail(e.message);
-    } catch (_) {
-      _fail('참여하지 못했어요. 다시 해 주세요.');
+    } catch (e) {
+      _fail('참여하지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})');
     }
   }
 

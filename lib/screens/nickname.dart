@@ -28,11 +28,11 @@ class _NicknameScreenState extends State<NicknameScreen> {
     try {
       await Repo.instance.setNickname(n);
       widget.onDone();
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('저장하지 못했어요. 다시 해 주세요.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('저장하지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})')));
       }
     }
   }

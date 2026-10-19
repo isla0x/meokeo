@@ -73,7 +73,7 @@ class _PostSheetState extends State<_PostSheet> {
         setState(() => _busy = false);
         final big = e.toString().contains('too-large');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(big ? '사진이 너무 커요. 다른 사진으로 해 주세요.' : '올리지 못했어요. 다시 해 주세요.')));
+            content: Text(big ? '사진이 너무 커요. 다른 사진으로 해 주세요.' : '올리지 못했어요. 다시 해 주세요.\n(${errorDetail(e)})')));
       }
     }
   }
