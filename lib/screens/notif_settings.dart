@@ -85,7 +85,7 @@ class NotifSettingsPage extends StatelessWidget {
                   onTap: () => Navigator.of(ctx).pop(true),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: Text('완료', style: ts(16, w: FontWeight.w700, lh: 22, color: C.teal)),
+                    child: Text('완료', style: ts(16, w: FontWeight.w700, lh: 22, color: C.accent)),
                   ),
                 ),
               ]),

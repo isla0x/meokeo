@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 
 /// 목업에서 그대로 가져온 색
 abstract final class C {
-  static const bg = Color(0xFFF2F2F7);
+  static const bg = Color(0xFFF3EEE5); // 따뜻한 종이톤
   static const white = Color(0xFFFFFFFF);
   static const black = Color(0xFF000000);
-  static const teal = Color(0xFF2F7F7A); // 포인트(딥 틸)
+  static const accent = Color(0xFF14201E); // 메인 포인트(먹색)
+  static const lime = Color(0xFFD9F66B); // 눌러야 할 곳에만 쓰는 라임
   static const amber = Color(0xFFE5A23F); // 아침
   static const indigo = Color(0xFF5C5BA6); // 저녁
   static const ink = Color(0xFF1C1C1E);

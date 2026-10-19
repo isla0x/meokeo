@@ -92,7 +92,7 @@ class _NicknamePageState extends State<NicknamePage> {
                           style: ts(15, lh: 20),
                           placeholder: '예: 지민',
                           placeholderStyle: ts(15, lh: 20, color: C.gray8),
-                          cursorColor: C.teal,
+                          cursorColor: C.accent,
                           inputFormatters: [LengthLimitingTextInputFormatter(8)],
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _go(),

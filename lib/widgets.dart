@@ -186,7 +186,7 @@ class MSwitch extends StatelessWidget {
           width: 51,
           height: 31,
           decoration: BoxDecoration(
-            color: value ? C.teal : C.fill16,
+            color: value ? C.accent : C.fill16,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Stack(children: [
@@ -354,8 +354,8 @@ class CtaButton extends StatelessWidget {
         child: Container(
           height: 54,
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: C.white, borderRadius: BorderRadius.circular(27), boxShadow: kCtaShadow),
-          child: Text(label, style: ts(15, w: FontWeight.w700, lh: 20, color: enabled ? C.sub : C.grayAE)),
+          decoration: BoxDecoration(color: enabled ? C.lime : C.white, borderRadius: BorderRadius.circular(27), boxShadow: kCtaShadow),
+          child: Text(label, style: ts(15, w: FontWeight.w700, lh: 20, color: enabled ? C.accent : C.grayAE)),
         ),
       ),
     );
@@ -827,7 +827,7 @@ class CodeBox extends StatelessWidget {
         color: empty ? C.fill10 : C.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: active
-            ? const [BoxShadow(color: C.teal, spreadRadius: 2)]
+            ? const [BoxShadow(color: C.accent, spreadRadius: 2)]
             : empty
                 ? null
                 : const [
@@ -836,7 +836,7 @@ class CodeBox extends StatelessWidget {
                   ],
       ),
       child: active && (char == null || char!.isEmpty)
-          ? Container(width: 2, height: 28, decoration: BoxDecoration(color: C.teal, borderRadius: BorderRadius.circular(1)))
+          ? Container(width: 2, height: 28, decoration: BoxDecoration(color: C.accent, borderRadius: BorderRadius.circular(1)))
           : Text(char ?? '', style: ts(fontSize, w: FontWeight.w700, lh: 24)),
     );
   }

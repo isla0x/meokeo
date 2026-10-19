@@ -41,9 +41,9 @@ enum Meal {
   final int endMin; // 마감
 
   Color get color => switch (this) {
-        Meal.breakfast => C.amber,
-        Meal.lunch => C.teal,
-        Meal.dinner => C.indigo,
+        Meal.breakfast => C.accent,
+        Meal.lunch => C.accent,
+        Meal.dinner => C.accent,
       };
 
   IconSpec get glyph => switch (this) {
@@ -90,7 +90,7 @@ enum RoomIcon {
   heart('heart', C.pink),
   house('home', C.orange),
   people('people', C.blue),
-  dining('dining', C.teal);
+  dining('dining', C.accent);
 
   const RoomIcon(this.key, this.color);
   final String key;

@@ -47,7 +47,7 @@ class MeokeoApp extends StatelessWidget {
         ],
         theme: const CupertinoThemeData(
           brightness: Brightness.light,
-          primaryColor: C.teal,
+          primaryColor: C.accent,
           scaffoldBackgroundColor: C.bg,
         ),
         builder: (context, child) {

@@ -140,7 +140,7 @@ class _RoomCreateSheetState extends State<RoomCreateSheet> {
                           style: ts(15, lh: 20),
                           placeholder: '예: 가족, 회사 동기',
                           placeholderStyle: ts(15, lh: 20, color: C.gray8),
-                          cursorColor: C.teal,
+                          cursorColor: C.accent,
                           inputFormatters: [LengthLimitingTextInputFormatter(10)],
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
@@ -193,7 +193,7 @@ class _RoomCreateSheetState extends State<RoomCreateSheet> {
                     style: ts(13, lh: 18, color: C.sub),
                     children: [
                       const TextSpan(text: '이미 초대 코드가 있나요? '),
-                      TextSpan(text: '코드로 참여하기', style: ts(13, w: FontWeight.w600, lh: 18, color: C.teal)),
+                      TextSpan(text: '코드로 참여하기', style: ts(13, w: FontWeight.w600, lh: 18, color: C.accent)),
                     ],
                   )),
                 ),
@@ -233,7 +233,7 @@ class _IconChoice extends StatelessWidget {
             color: icon.color,
             borderRadius: BorderRadius.circular(18),
             boxShadow: selected
-                ? const [BoxShadow(color: C.teal, spreadRadius: 4), BoxShadow(color: C.white, spreadRadius: 2)]
+                ? const [BoxShadow(color: C.accent, spreadRadius: 4), BoxShadow(color: C.white, spreadRadius: 2)]
                 : null,
           ),
           alignment: Alignment.center,

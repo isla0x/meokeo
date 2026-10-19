@@ -181,10 +181,21 @@ class _MonthCard extends StatelessWidget {
                       ? C.red
                       : C.black;
       final dots = <Widget>[];
-      for (final m in Meal.values) {
-        if (!meals.contains(m.name)) continue;
-        if (dots.isNotEmpty) dots.add(const SizedBox(width: 3));
-        dots.add(Container(width: 5, height: 5, decoration: BoxDecoration(color: m.color, shape: BoxShape.circle)));
+      // 아침·점심·저녁 자리에 점 3개: 올린 끼니는 채운 점, 아직이면 빈 점
+      if (meals.isNotEmpty) {
+        for (final m in Meal.values) {
+          if (dots.isNotEmpty) dots.add(const SizedBox(width: 3));
+          final on = meals.contains(m.name);
+          dots.add(Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              color: on ? C.accent : null,
+              border: on ? null : Border.all(color: C.grayAE, width: 1),
+              shape: BoxShape.circle,
+            ),
+          ));
+        }
       }
       final label = '${d.month}월 ${d.day}일${isSel ? ', 선택됨' : isToday ? ', 오늘' : dots.isNotEmpty ? ', 기록 있음' : ''}';
       return Expanded(

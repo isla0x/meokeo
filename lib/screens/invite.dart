@@ -161,7 +161,7 @@ class InvitePage extends StatelessWidget {
                       onTap: () => _regenerate(context, app, room),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        child: Text('코드 다시 만들기', style: ts(13, w: FontWeight.w600, lh: 18, color: C.teal)),
+                        child: Text('코드 다시 만들기', style: ts(13, w: FontWeight.w600, lh: 18, color: C.accent)),
                       ),
                     ),
                     Flexible(child: Text('이전 코드는 쓸 수 없게 돼요', style: ts(12, lh: 16, color: C.sub))),
@@ -251,7 +251,7 @@ class _MemberRow extends StatelessWidget {
               height: 52,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: mine ? C.teal : others[(i - 1) % others.length],
+                color: mine ? C.accent : others[(i - 1) % others.length],
                 shape: BoxShape.circle,
                 boxShadow: mine ? const [BoxShadow(color: Color(0x4D2F7F7A), offset: Offset(0, 3), blurRadius: 8)] : null,
               ),

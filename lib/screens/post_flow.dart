@@ -214,7 +214,7 @@ class _PostSheetState extends State<PostSheet> {
                           style: ts(15, lh: 20),
                           placeholder: '한 줄로 적어 보세요 (선택)',
                           placeholderStyle: ts(15, lh: 20, color: C.gray8),
-                          cursorColor: C.teal,
+                          cursorColor: C.accent,
                           inputFormatters: [LengthLimitingTextInputFormatter(30)],
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),

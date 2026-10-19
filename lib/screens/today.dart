@@ -415,8 +415,8 @@ class _BigCard extends StatelessWidget {
                   margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: i < done ? C.teal : null,
-                    border: Border.all(color: i < done ? C.teal : C.grayAE, width: 1),
+                    color: i < done ? C.accent : null,
+                    border: Border.all(color: i < done ? C.accent : C.grayAE, width: 1),
                   ),
                 ),
             ]),
