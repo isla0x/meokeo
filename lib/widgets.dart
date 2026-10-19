@@ -654,7 +654,7 @@ Future<void> showAlert(BuildContext context, String message, {String? title}) {
       title: title == null ? null : Text(title),
       content: Text(message),
       actions: [
-        CupertinoDialogAction(isDefault: true, onPressed: () => Navigator.of(ctx).pop(), child: const Text('확인')),
+        CupertinoDialogAction(isDefaultAction: true, onPressed: () => Navigator.of(ctx).pop(), child: const Text('확인')),
       ],
     ),
   );

@@ -380,6 +380,6 @@ class _DayDetail extends StatelessWidget {
             ),
         ]),
       ),
-    ];
+    ]);
   }
 }

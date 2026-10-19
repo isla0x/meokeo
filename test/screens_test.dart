@@ -2,7 +2,6 @@
 // 저장 위치는 환경변수 SHOT_DIR (없으면 build/shots).
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
