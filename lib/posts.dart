@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 enum Meal {
   breakfast('아침', '🌅', 5, 10),
@@ -35,7 +35,7 @@ class Post {
     required this.uid,
     required this.meal,
     required this.date,
-    required this.photoUrl,
+    required this.photo,
     required this.text,
   });
 
@@ -43,7 +43,7 @@ class Post {
   final String uid;
   final Meal meal;
   final String date;
-  final String photoUrl;
+  final Uint8List photo;
   final String text;
 
   factory Post.fromDoc(DocumentSnapshot<Map<String, dynamic>> d) {
@@ -53,7 +53,7 @@ class Post {
       uid: m['uid'] as String,
       meal: Meal.values.firstWhere((x) => x.name == m['meal'], orElse: () => Meal.lunch),
       date: m['date'] as String,
-      photoUrl: (m['photoUrl'] ?? '') as String,
+      photo: (m['photo'] as Blob).bytes,
       text: (m['text'] ?? '') as String,
     );
   }
@@ -64,7 +64,6 @@ class PostRepo {
   static final instance = PostRepo._();
 
   final _db = FirebaseFirestore.instance;
-  final _st = FirebaseStorage.instance;
   String get uid => FirebaseAuth.instance.currentUser!.uid;
 
   CollectionReference<Map<String, dynamic>> _col(String roomId) =>
@@ -98,14 +97,15 @@ class PostRepo {
   }) async {
     final date = dayKey(day);
     final id = '${date}_${meal.name}_$uid';
-    final ref = _st.ref('meals/$roomId/$id.jpg');
-    await ref.putFile(photo, SettableMetadata(contentType: 'image/jpeg'));
-    final url = await ref.getDownloadURL();
+    final bytes = await photo.readAsBytes();
+    if (bytes.length > 700 * 1024) {
+      throw Exception('too-large');
+    }
     await _col(roomId).doc(id).set({
       'uid': uid,
       'meal': meal.name,
       'date': date,
-      'photoUrl': url,
+      'photo': Blob(bytes),
       'text': text.trim(),
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -113,8 +113,5 @@ class PostRepo {
 
   Future<void> delete(String roomId, Post p) async {
     await _col(roomId).doc(p.id).delete();
-    try {
-      await _st.ref('meals/$roomId/${p.id}.jpg').delete();
-    } catch (_) {}
   }
 }

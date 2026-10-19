@@ -47,7 +47,7 @@ class _PostSheetState extends State<_PostSheet> {
     try {
       // 다시 인코딩되어 위치 등 메타데이터가 빠져요.
       final x = await _picker.pickImage(
-          source: src, maxWidth: 1600, maxHeight: 1600, imageQuality: 80);
+          source: src, maxWidth: 1000, maxHeight: 1000, imageQuality: 60);
       if (x != null) setState(() => _photo = File(x.path));
     } catch (_) {
       if (mounted) {
@@ -68,11 +68,12 @@ class _PostSheetState extends State<_PostSheet> {
           photo: _photo!,
           text: _text.text);
       if (mounted) Navigator.of(context).pop();
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('올리지 못했어요. 다시 해 주세요.')));
+        final big = e.toString().contains('too-large');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(big ? '사진이 너무 커요. 다른 사진으로 해 주세요.' : '올리지 못했어요. 다시 해 주세요.')));
       }
     }
   }

@@ -185,13 +185,10 @@ class _PostCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: SizedBox(
                   width: 150,
-                  child: Image.network(
-                    post.photoUrl,
+                  child: Image.memory(
+                    post.photo,
                     fit: BoxFit.cover,
-                    loadingBuilder: (c, w, p) => p == null
-                        ? w
-                        : const ColoredBox(
-                            color: kPinkSoft, child: Center(child: CircularProgressIndicator())),
+                    gaplessPlayback: true,
                     errorBuilder: (_, __, ___) =>
                         const ColoredBox(color: kPinkSoft, child: Center(child: Text('🍽️'))),
                   ),

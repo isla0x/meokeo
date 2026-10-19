@@ -54,7 +54,8 @@ service cloud.firestore {
           && request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.members
           && request.resource.data.uid == request.auth.uid
           && postId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}_(breakfast|lunch|dinner)_' + request.auth.uid + '$')
-          && request.resource.data.text.size() <= 30;
+          && request.resource.data.text.size() <= 30
+          && request.resource.data.photo.size() < 800000;
         allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
       }
     }
