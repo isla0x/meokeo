@@ -239,7 +239,7 @@ void main() {
       tester,
       PostSheet(meal: Meal.lunch, auto: true, photo: food('kimchi'), takenAt: DateTime(2026, 10, 19, 12, 31), initialText: '김치찌개'),
     );
-    await tester.tap(find.text('가족')); // 가족 방은 끄기
+    await tester.tap(find.descendant(of: find.byType(PostSheet), matching: find.text('가족'))); // 가족 방은 끄기
     await settle(tester);
     await shot(tester, 'PostSheet');
     await finish(tester);
