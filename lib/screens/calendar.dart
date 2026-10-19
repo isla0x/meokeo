@@ -4,15 +4,15 @@ import '../data.dart';
 import '../posts.dart';
 import '../theme.dart';
 
-class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key, required this.room});
+class CalendarView extends StatefulWidget {
+  const CalendarView({super.key, required this.room});
   final Room room;
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  State<CalendarView> createState() => _CalendarViewState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarViewState extends State<CalendarView> {
   late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   late DateTime _selected = DateTime.now();
 
@@ -23,9 +23,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('${widget.room.icon} ${widget.room.name} 달력')),
-      body: StreamBuilder<List<Post>>(
+    return StreamBuilder<List<Post>>(
         stream: PostRepo.instance.postsInMonth(widget.room.id, _month),
         builder: (context, snap) {
           if (snap.hasError) {
@@ -39,7 +37,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           final selPosts = (byDay[dayKey(_selected)] ?? [])
             ..sort((a, b) => a.meal.index.compareTo(b.meal.index));
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,7 +77,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                                color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                                color: Colors.white, borderRadius: BorderRadius.circular(kRadius)),
                             child: Row(
                               children: [
                                 ClipRRect(
@@ -107,7 +105,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           );
         },
-      ),
     );
   }
 
@@ -137,9 +134,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: sel ? kPinkSoft : Colors.white,
+          color: sel ? kTealSoft : Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: today ? kPink : Colors.transparent, width: 1.5),
+          border: Border.all(color: today ? kTeal : Colors.transparent, width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -156,7 +153,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     margin: const EdgeInsets.symmetric(horizontal: 1),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: posts.any((p) => p.meal == m) ? kPink : const Color(0xFFE6E6EA),
+                      color: posts.any((p) => p.meal == m) ? kTeal : const Color(0xFFE6E6EA),
                     ),
                   ),
               ],

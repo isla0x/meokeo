@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../data.dart';
 import '../posts.dart';
 import '../theme.dart';
+import '../widgets.dart';
 
 Future<void> showPostSheet(BuildContext context,
     {required Room room, required Meal meal, required DateTime day}) {
@@ -90,7 +91,7 @@ class _PostSheetState extends State<_PostSheet> {
             Text('${widget.meal.emoji} ${widget.meal.label} 올리기',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            Text('${widget.room.icon} ${widget.room.name} 방에만 보여요',
+            Text('${widget.room.name} 방에만 보여요',
                 style: const TextStyle(color: kMuted)),
             const SizedBox(height: 14),
             AspectRatio(
@@ -133,9 +134,9 @@ class _PostSheetState extends State<_PostSheet> {
               decoration: const InputDecoration(hintText: '한 줄 (선택)', counterText: ''),
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            BigButton(
+              label: _busy ? '올리는 중…' : '올리기',
               onPressed: (_photo == null || _busy) ? null : _submit,
-              child: Text(_busy ? '올리는 중…' : '올리기'),
             ),
           ],
         ),

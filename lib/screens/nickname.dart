@@ -48,7 +48,7 @@ class _NicknameScreenState extends State<NicknameScreen> {
             children: [
               const Spacer(),
               const Text('뭐먹어?',
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: kPink)),
+                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: kTeal)),
               const SizedBox(height: 8),
               const Text('방 친구들에게 보일 별명을 정해 주세요.',
                   style: TextStyle(fontSize: 16, color: kMuted)),

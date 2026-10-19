@@ -3,26 +3,51 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart' show Color, IconData, Icons;
+
+import 'theme.dart';
+
+enum MealPhase { upcoming, now, past }
 
 enum Meal {
-  breakfast('아침', '🌅', 5, 10),
-  lunch('점심', '☀️', 11, 15),
-  dinner('저녁', '🌙', 17, 22);
+  breakfast('아침', '🌅', 7 * 60, 9 * 60 + 30, Icons.wb_twilight_rounded, kSunrise),
+  lunch('점심', '☀️', 11 * 60 + 30, 13 * 60, Icons.wb_sunny_rounded, kTeal),
+  dinner('저녁', '🌙', 17 * 60, 19 * 60, Icons.nightlight_round, kMoon);
 
-  const Meal(this.label, this.emoji, this.fromHour, this.toHour);
+  const Meal(this.label, this.emoji, this.fromMin, this.toMin, this.icon, this.color);
   final String label;
   final String emoji;
-  final int fromHour;
-  final int toHour;
+  final int fromMin;
+  final int toMin;
+  final IconData icon;
+  final Color color;
 
-  String get window => '$fromHour:00 – $toHour:00';
+  static String _c(int m, {bool period = true}) {
+    final h = m ~/ 60, mi = m % 60;
+    final per = h < 12 ? '오전' : '오후';
+    final h12 = h % 12 == 0 ? 12 : h % 12;
+    return '${period ? '$per ' : ''}$h12:${mi.toString().padLeft(2, '0')}';
+  }
 
-  /// 지금 시각에 가까운 끼니
-  static Meal nearest(DateTime now) {
-    final h = now.hour;
-    if (h < 11) return breakfast;
-    if (h < 16) return lunch;
-    return dinner;
+  String get window {
+    final samePeriod = (fromMin ~/ 60 < 12) == (toMin ~/ 60 < 12);
+    return '${_c(fromMin)} – ${_c(toMin, period: !samePeriod)}';
+  }
+
+  MealPhase phase(DateTime now) {
+    final m = now.hour * 60 + now.minute;
+    if (m < fromMin) return MealPhase.upcoming;
+    if (m <= toMin) return MealPhase.now;
+    return MealPhase.past;
+  }
+
+  /// 카메라 버튼으로 올릴 때 기본이 되는 끼니: 지금 열린 끼니 → 가장 최근에 시작한 끼니
+  static Meal forCamera(DateTime now) {
+    Meal pick = breakfast;
+    for (final m in values) {
+      if (m.phase(now) != MealPhase.upcoming) pick = m;
+    }
+    return pick;
   }
 }
 
@@ -44,6 +69,7 @@ class Post {
     required this.date,
     required this.photo,
     required this.text,
+    required this.at,
   });
 
   final String id;
@@ -52,6 +78,7 @@ class Post {
   final String date;
   final Uint8List photo;
   final String text;
+  final DateTime at;
 
   factory Post.fromDoc(DocumentSnapshot<Map<String, dynamic>> d) {
     final m = d.data()!;
@@ -62,6 +89,7 @@ class Post {
       date: m['date'] as String,
       photo: _bytesOf(m['photo']),
       text: (m['text'] ?? '') as String,
+      at: (m['createdAt'] is Timestamp) ? (m['createdAt'] as Timestamp).toDate() : DateTime.now(),
     );
   }
 }

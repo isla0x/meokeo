@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 
-const Color kPink = Color(0xFFE8658A);
-const Color kPinkSoft = Color(0xFFFDE8EF);
-const Color kBg = Color(0xFFF7F7F9);
-const Color kInk = Color(0xFF1C1C1E);
-const Color kMuted = Color(0xFF8A8A8E);
+// 목업 색: 청록 포인트 + iOS 그룹 배경
+const Color kTeal = Color(0xFF2F7F7A);
+const Color kTealSoft = Color(0xFFE3F0EE);
+const Color kBg = Color(0xFFF2F2F7);
+const Color kInk = Color(0xFF111111);
+const Color kMuted = Color(0xFF6C6C70);
+const Color kHair = Color(0xFFE2E2E9);
+const Color kSunrise = Color(0xFFE9A93A);
+const Color kMoon = Color(0xFF5C5BA6);
+
+const double kRadius = 24;
+
+List<BoxShadow> softShadow() => [
+      BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4)),
+    ];
 
 ThemeData buildTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: kPink, surface: Colors.white);
+  final scheme = ColorScheme.fromSeed(seedColor: kTeal, surface: Colors.white);
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: kBg,
+    splashFactory: NoSplash.splashFactory,
     appBarTheme: const AppBarTheme(
       backgroundColor: kBg,
       foregroundColor: kInk,
@@ -19,22 +30,10 @@ ThemeData buildTheme() {
       scrolledUnderElevation: 0,
       centerTitle: true,
     ),
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        backgroundColor: kPink,
-        foregroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-      ),
-    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
   );

@@ -33,7 +33,7 @@ class Room {
     return Room(
       id: d.id,
       name: (m['name'] as String?) ?? '',
-      icon: (m['icon'] as String?) ?? '🍚',
+      icon: (m['icon'] as String?) ?? 'dining',
       ownerId: (m['ownerId'] as String?) ?? '',
       members: List<String>.from((m['members'] as List?) ?? const []),
       code: (m['code'] as String?) ?? '',

@@ -90,7 +90,7 @@ class _NotifSettingsScreenState extends State<NotifSettingsScreen> {
                       onTap: () => _pick(m),
                       trailing: Switch(
                         value: a[m]!.enabled,
-                        activeColor: kPink,
+                        activeColor: kTeal,
                         onChanged: (v) => _toggle(m, v),
                       ),
                     ),

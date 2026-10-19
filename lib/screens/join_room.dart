@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../data.dart';
 import '../theme.dart';
+import '../widgets.dart';
 import 'invite.dart';
 
 class JoinRoomScreen extends StatefulWidget {
@@ -14,22 +15,37 @@ class JoinRoomScreen extends StatefulWidget {
 
 class _JoinRoomScreenState extends State<JoinRoomScreen> {
   final _code = TextEditingController();
+  final _focus = FocusNode();
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _code.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
     _code.dispose();
+    _focus.dispose();
     super.dispose();
+  }
+
+  String _clean(String t) {
+    final u = t.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    return u.length > kCodeLength ? u.substring(0, kCodeLength) : u;
   }
 
   Future<void> _paste() async {
     final d = await Clipboard.getData(Clipboard.kTextPlain);
-    final t = (d?.text ?? '').toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
-    if (t.isNotEmpty) setState(() => _code.text = t.length > kCodeLength ? t.substring(0, kCodeLength) : t);
+    final t = _clean(d?.text ?? '');
+    if (t.isNotEmpty) {
+      _code.value = TextEditingValue(text: t, selection: TextSelection.collapsed(offset: t.length));
+    }
   }
 
   Future<void> _join() async {
-    if (_busy) return;
+    if (_busy || _code.text.length < kCodeLength) return;
     setState(() => _busy = true);
     try {
       final room = await Repo.instance.joinByCode(_code.text);
@@ -51,47 +67,103 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final code = _code.text;
+    final ready = code.length == kCodeLength;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('코드로 참여하기'),
-        leadingWidth: 72,
-        leading: TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('취소')),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text('초대 코드를 입력해요',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          const Text('친구가 보내 준 8자리 코드예요', style: TextStyle(color: kMuted)),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _code,
-            autofocus: true,
-            maxLength: kCodeLength,
-            textCapitalization: TextCapitalization.characters,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: 6),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
-              TextInputFormatter.withFunction(
-                  (o, n) => n.copyWith(text: n.text.toUpperCase())),
-            ],
-            decoration: const InputDecoration(counterText: '', hintText: 'K7M29QX4'),
-            onSubmitted: (_) => _join(),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: _paste,
-              icon: const Icon(Icons.content_paste_rounded, size: 18),
-              label: const Text('복사한 코드 붙여넣기'),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+          child: Column(children: [
+            Stack(alignment: Alignment.center, children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                    child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ),
+              const Text('코드로 참여하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            ]),
+            const SizedBox(height: 26),
+            SizedBox(
+              height: 52,
+              child: Stack(alignment: Alignment.center, children: [
+                for (final e in const [['🥗', -52.0], ['🍲', 0.0], ['🍱', 52.0]])
+                  Transform.translate(
+                    offset: Offset(e[1] as double, 0),
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Colors.white, shape: BoxShape.circle, boxShadow: softShadow()),
+                      child: Text(e[0] as String, style: const TextStyle(fontSize: 26)),
+                    ),
+                  ),
+              ]),
             ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: _busy ? null : _join, child: const Text('참여하기')),
-        ],
+            const SizedBox(height: 18),
+            const Text('초대 코드를 입력해요', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            const Text('친구가 보내 준 8자리 코드예요', style: TextStyle(color: kMuted)),
+            const SizedBox(height: 22),
+            GestureDetector(
+              onTap: () => _focus.requestFocus(),
+              child: CodeBoxes(
+                code: code,
+                activeIndex: code.length < kCodeLength ? code.length : null,
+                size: 34,
+              ),
+            ),
+            // 실제 입력은 보이지 않는 입력창이 받아요
+            SizedBox(
+              height: 1,
+              child: Opacity(
+                opacity: 0,
+                child: TextField(
+                  controller: _code,
+                  focusNode: _focus,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.characters,
+                  keyboardType: TextInputType.visiblePassword,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  inputFormatters: [
+                    TextInputFormatter.withFunction((o, n) {
+                      final t = _clean(n.text);
+                      return TextEditingValue(text: t, selection: TextSelection.collapsed(offset: t.length));
+                    }),
+                  ],
+                  onSubmitted: (_) => _join(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            GestureDetector(
+              onTap: _paste,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                    color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: softShadow()),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.content_paste_rounded, size: 16, color: kTeal),
+                  SizedBox(width: 6),
+                  Text('복사한 코드 붙여넣기', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                ]),
+              ),
+            ),
+            const Spacer(),
+            BigButton(
+              label: _busy ? '참여하는 중…' : '참여하기',
+              onPressed: (ready && !_busy) ? _join : null,
+            ),
+          ]),
+        ),
       ),
     );
   }
