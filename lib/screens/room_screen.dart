@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data.dart';
 import '../posts.dart';
 import '../theme.dart';
+import 'calendar.dart';
 import 'invite.dart';
 import 'post_sheet.dart';
 
@@ -27,6 +28,14 @@ class _RoomScreenState extends State<RoomScreen> {
           appBar: AppBar(
             title: Text(room == null ? '' : '${room.icon} ${room.name}'),
             actions: [
+              IconButton(
+                tooltip: '달력',
+                icon: const Icon(Icons.calendar_month_outlined),
+                onPressed: room == null
+                    ? null
+                    : () => Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (_) => CalendarScreen(room: room))),
+              ),
               IconButton(
                 tooltip: '초대·멤버',
                 icon: const Icon(Icons.group_add_outlined),
