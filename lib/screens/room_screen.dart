@@ -52,7 +52,7 @@ class _RoomScreenState extends State<RoomScreen> {
                   stream: PostRepo.instance.postsOn(room.id, dayKey(_today)),
                   builder: (context, ps) {
                     if (ps.hasError) {
-                      return const Center(child: Text('불러오지 못했어요.'));
+                      return Center(child: Padding(padding: const EdgeInsets.all(24), child: Text('불러오지 못했어요.\n(${errorDetail(ps.error!)})', textAlign: TextAlign.center)));
                     }
                     final posts = ps.data ?? const <Post>[];
                     return FutureBuilder<Map<String, String>>(

@@ -28,6 +28,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: StreamBuilder<List<Post>>(
         stream: PostRepo.instance.postsInMonth(widget.room.id, _month),
         builder: (context, snap) {
+          if (snap.hasError) {
+            return Center(child: Text('불러오지 못했어요.\n(${errorDetail(snap.error!)})', textAlign: TextAlign.center));
+          }
           final posts = snap.data ?? const <Post>[];
           final byDay = <String, List<Post>>{};
           for (final p in posts) {
