@@ -29,6 +29,16 @@ class _PostSheetState extends State<_PostSheet> {
   final _text = TextEditingController();
   File? _photo;
   bool _busy = false;
+  List<Room> _rooms = const [];
+  late final Set<String> _sel = {widget.room.id};
+
+  @override
+  void initState() {
+    super.initState();
+    Repo.instance.myRooms().first.then((r) {
+      if (mounted) setState(() => _rooms = r);
+    }).catchError((_) {});
+  }
 
   @override
   void dispose() {
@@ -47,11 +57,13 @@ class _PostSheetState extends State<_PostSheet> {
   }
 
   Future<void> _submit() async {
-    if (_photo == null || _busy) return;
+    if (_photo == null || _busy || _sel.isEmpty) return;
     setState(() => _busy = true);
     try {
-      await PostRepo.instance.upload(
-          roomId: widget.room.id, meal: widget.meal, day: widget.day, photo: _photo!, text: _text.text);
+      for (final id in _sel) {
+        await PostRepo.instance.upload(
+            roomId: id, meal: widget.meal, day: widget.day, photo: _photo!, text: _text.text);
+      }
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
@@ -82,11 +94,47 @@ class _PostSheetState extends State<_PostSheet> {
                 Expanded(
                   child: Column(children: [
                     Text('${widget.meal.label} 올리기', style: font(16, FontWeight.w600)),
-                    Text('${widget.room.name} 방에만 보여요', style: TextStyle(fontSize: 11, color: secondary)),
+                    Text(
+                        _sel.isEmpty
+                            ? '공유할 방을 골라 주세요'
+                            : '${_rooms.where((r) => _sel.contains(r.id)).map((r) => r.name).ifEmpty(widget.room.name)} 방에만 보여요',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11, color: secondary)),
                   ]),
                 ),
                 const SizedBox(width: 44),
               ]),
+              if (_rooms.length >= 2) ...[
+                const SizedBox(height: 12),
+                Text('공유할 방', style: font(12, FontWeight.w600).copyWith(color: secondary)),
+                const SizedBox(height: 6),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  for (final r in _rooms)
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        if (!_sel.remove(r.id)) _sel.add(r.id);
+                      }),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: _sel.contains(r.id) ? kAccent : CupertinoColors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: _sel.contains(r.id) ? kAccent : const Color(0xFFCFD2E6)),
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          if (_sel.contains(r.id)) ...[
+                            const Icon(CupertinoIcons.checkmark_alt, size: 13, color: CupertinoColors.white),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(r.name,
+                              style: font(13, FontWeight.w600)
+                                  .copyWith(color: _sel.contains(r.id) ? CupertinoColors.white : kInk)),
+                        ]),
+                      ),
+                    ),
+                ]),
+              ],
               const SizedBox(height: 12),
               AspectRatio(
                 aspectRatio: 4 / 3,
@@ -131,11 +179,15 @@ class _PostSheetState extends State<_PostSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              PrimaryButton(label: _busy ? '올리는 중…' : '올리기', onPressed: (_photo == null || _busy) ? null : _submit),
+              PrimaryButton(label: _busy ? '올리는 중…' : '올리기', onPressed: (_photo == null || _busy || _sel.isEmpty) ? null : _submit),
             ]),
           ),
         ),
       ),
     );
   }
+}
+
+extension _Names on Iterable<String> {
+  String ifEmpty(String fallback) => isEmpty ? fallback : join(', ');
 }
