@@ -29,6 +29,13 @@ enum Meal {
 String dayKey(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+Uint8List _bytesOf(dynamic v) {
+  if (v is Blob) return v.bytes;
+  if (v is Uint8List) return v;
+  if (v is List) return Uint8List.fromList(v.cast<int>());
+  return Uint8List(0);
+}
+
 class Post {
   Post({
     required this.id,
@@ -53,7 +60,7 @@ class Post {
       uid: m['uid'] as String,
       meal: Meal.values.firstWhere((x) => x.name == m['meal'], orElse: () => Meal.lunch),
       date: m['date'] as String,
-      photo: (m['photo'] as Blob).bytes,
+      photo: _bytesOf(m['photo']),
       text: (m['text'] ?? '') as String,
     );
   }
